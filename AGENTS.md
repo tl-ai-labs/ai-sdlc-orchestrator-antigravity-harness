@@ -34,7 +34,9 @@ Rules for Antigravity CLI (`agy`) sessions editing this repo. The full contribut
 - **Headless runs need `--dangerously-skip-permissions`.** Print mode soft-denies any tool that would prompt. `--gates=auto-approve` is the pass skill's gate mode, a different layer.
 - **Driver cost is modeled, never presented as spend.** Seat billing has no invoice; the event reader prices `usage` from the driver block's card and labels the line `modeled`.
 - **Never edit `~/.gemini/`.** The plugin is discovered from `.agents/plugins.json` in the repo. `agy plugin install`, `agy plugin import` and `agy mcp add` all write under your home directory; do not use them for this repo.
-- **Every capability claim cites a check** in `docs/verification/p1-agy-runtime.md`. A check marked pending pins nothing.
+- **Every capability claim cites a check** in `docs/verification/p1-agy-runtime.md`. A check marked pending pins nothing. `plugin/agy/telemetry/fairnessPin.mjs` mirrors the pending set; flip an entry only in the commit that records the live result.
+- **Two dispatch routes, one contract.** The conductor calls the bridge's MCP tools directly (pattern a); `plugin/agy/dispatch.mjs` is the fallback when a session binds none (pattern b). Both go through the same five tools and the same TaskPacket.
+- **`manifest.json` is code-written** (`plugin/agy/manifest.mjs`), never by the model. The driver's own line lives in `driver-cost-modeled.jsonl`, `provenance: "modeled"`, `tier: "orchestrator"`.
 
 ## Other conventions
 

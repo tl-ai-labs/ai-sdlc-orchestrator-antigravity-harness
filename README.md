@@ -12,7 +12,7 @@ The conductor authors no shipped content. Every requirements document, design, p
 
 ## Status
 
-**P2 — skeleton.** The plugin, bridge, policies and prompts are in place and the offline test suite passes. The driver layer (`plugin/agy/`), the hook shim and the agy re-wording of the prompts land in P3, after the live checks in [docs/verification/p1-agy-runtime.md](docs/verification/p1-agy-runtime.md) settle which dispatch pattern the runtime supports. No measured run has been made.
+**P3 — driver layer.** The plugin, bridge, policies, prompts and the headless driver (`plugin/agy/`) are in place; the offline test suite passes and `run.mjs --dry-run` prints the pinned invocation. The pin's live checks in [docs/verification/p1-agy-runtime.md](docs/verification/p1-agy-runtime.md) (1, 2, 4, 5, 6) are still pending a signed-in `agy` session, so `run.mjs` refuses a paid run unless told to stamp the pin as unverified. No measured run has been made.
 
 ## Layout
 
@@ -23,7 +23,12 @@ The conductor authors no shipped content. Every requirements document, design, p
 | `plugin/agents/*.md` | The five role prompts, carried as content: each becomes the system prompt of a bridge dispatch |
 | `plugin/mcp/model-dispatch/` | The bridge: routing policy → adapter → model, with its own telemetry ledger. `dist/` is gitignored; build it |
 | `plugin/config/policies/` | Routing policies. `antigravity-flash38-plus-opus5.yaml` is the study policy; `antigravity-flash38-plus-haiku45.yaml` proves the wiring for cents |
-| `plugin/agy/` | The driver layer (P3): `run.mjs`, the conductor prompt, the stream-json event reader, the fairness pin |
+| `plugin/agy/run.mjs` | The headless driver: builds the pinned `agy --print` invocation, captures stream-json, writes the driver's modeled cost and manifest |
+| `plugin/agy/prompts/conductor.md` | The conductor prompt: state machine, TaskPacket contract, gates, the MCP route and the dispatch fallback |
+| `plugin/agy/telemetry/` | `fairnessPin.mjs` reads the pin off the policy's `driver:` block; `event-reader.mjs` prices stream-json `usage` as a labeled modeled line |
+| `plugin/agy/dispatch.mjs` | Pattern (b): the conductor shells out to this when its session binds no bridge tool; it speaks MCP via `mcp/model-dispatch/src/driverClient.ts` |
+| `plugin/agy/hooks/`, `plugin/hooks.json` | The write-contract PreToolUse guard and the bridge-call heartbeat, in agy's hook format |
+| `plugin/agy/verify-setup.mjs`, `plugin/agy/env-checks.mjs` | Offline setup check and repair (`npm run verify -- --fix`) |
 | `.agents/plugins.json` | Registers `plugin/` with agy from the repo. Nothing is written under `~/.gemini/` |
 | `docs/verification/p1-agy-runtime.md` | Numbered runtime checks. Every pin cites one |
 | `examples/*/brief.md` | Briefs. `quick-demo` is the first paid run |
@@ -37,7 +42,16 @@ See [INSTALL.md](INSTALL.md) for the steps an agent (or you) can follow verbatim
 npm ci
 npm run build
 npm test
+npm run verify
 ```
+
+A headless run, dry first:
+
+```bash
+node plugin/agy/run.mjs --brief=examples/quick-demo/brief.md --project-root=/path/to/empty/dir --output-dir=/path/to/empty/dir/.sdlc --gates=auto-approve --dry-run
+```
+
+[docs/running.md](docs/running.md) has the flags, the resume loop and what the run directory holds.
 
 ## Standing rules
 

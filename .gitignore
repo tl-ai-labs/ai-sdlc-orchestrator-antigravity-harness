@@ -26,3 +26,9 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
+
+# Hook heartbeat log written next to the workspace by plugin/agy/hooks/heartbeat.mjs
+.hook-logs/
+
+# A stray clone of this repo nested in the working tree; never part of the harness
+/ai-sdlc-orchestrator-antigravity-harness/

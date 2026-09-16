@@ -8,6 +8,8 @@
   },
   "scripts": {
     "build": "npm --prefix plugin/mcp/model-dispatch ci && npm --prefix plugin/mcp/model-dispatch run build",
+    "verify": "node plugin/agy/verify-setup.mjs",
+    "run": "node plugin/agy/run.mjs",
     "report": "node tools/report.mjs",
     "test": "node --test tools/test/*.test.mjs && node tools/test-mcp.mjs"
   },

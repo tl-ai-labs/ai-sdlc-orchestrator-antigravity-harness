@@ -41,6 +41,17 @@ Do not run `agy plugin install` or `agy plugin import` on this repo: both copy t
 
 ```bash
 npm test
+npm run verify
 ```
 
-Offline and free. Then, inside an agy session in the repo, call the bridge's `load_policy` tool with `policy_name: antigravity-flash38-plus-haiku45` — it makes no vendor call and proves the MCP path.
+Both offline and free. `npm run verify` checks Node, `agy` (≥ 1.2.3), `claude`, the bridge build, repo-level plugin discovery and the credentials for the policy that would run; `npm run verify -- --fix` installs and builds the bridge. It does not check sign-in: run `agy models` yourself.
+
+Then, inside an agy session in the repo, call the bridge's `load_policy` tool with `policy_name: antigravity-flash38-plus-haiku45` — it makes no vendor call and proves the MCP path.
+
+## 6. Dry-run the driver
+
+```bash
+node plugin/agy/run.mjs --brief=examples/quick-demo/brief.md --project-root=/path/to/empty/dir --output-dir=/path/to/empty/dir/.sdlc --gates=auto-approve --dry-run
+```
+
+Prints the pinned `agy` invocation with credentials reported as set/unset only. [docs/running.md](docs/running.md) covers the flags and the run directory.

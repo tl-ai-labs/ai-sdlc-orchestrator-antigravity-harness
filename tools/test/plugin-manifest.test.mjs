@@ -51,3 +51,20 @@ test("the conductor rules ship inside the plugin", () => {
   assert.match(rules, /author no shipped content/);
   assert.match(rules, /execute_with_model/);
 });
+
+test("hooks.json uses agy's format: named hooks, regex matchers on step types, commands relative to the plugin dir", () => {
+  const hooks = readJson("plugin/hooks.json");
+  assert.ok(!("hooks" in hooks), "the Claude Code {hooks:{...}} envelope is not agy's format (check 11)");
+  const guard = hooks["mmo-write-contract"];
+  assert.ok(guard?.PreToolUse?.[0]?.matcher, "PreToolUse is grouped: matcher + hooks");
+  assert.match(guard.PreToolUse[0].matcher, /run_command/);
+  for (const group of [...guard.PreToolUse, ...hooks["mmo-telemetry-heartbeat"].PostToolUse]) {
+    for (const h of group.hooks) {
+      assert.equal(h.type, "command");
+      assert.ok(!h.command.includes("${CLAUDE_PLUGIN_ROOT}"), "no Claude Code variable");
+      const script = h.command.replace(/^node\s+/, "");
+      assert.ok(existsSync(join(ROOT, "plugin", script)), `${script} resolves from the plugin dir (hook cwd)`);
+    }
+  }
+  assert.equal(hooks["mmo-telemetry-heartbeat"].PostToolUse[0].matcher, "mcp_tool");
+});
