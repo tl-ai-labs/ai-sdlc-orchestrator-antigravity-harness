@@ -7,8 +7,8 @@
  * launched it. So this script does the coupling: snapshot policies before →
  * launch server + browser → wait for user to save → diff to find the
  * new/modified policy → write its name to the current project's
- * .sdlc/project.json as `default_policy`. Both /mmo:greenfield and /mmo:brownfield
- * read that field via session-hydrate.
+ * .sdlc/project.json as `default_policy`. The greenfield and brownfield skills
+ * read that field via session-hydrate, and plugin/agy/run.mjs takes --policy.
  *
  * Flow is hybrid on purpose:
  *   - happy path: user saves, presses Enter, script detects exactly one new file
@@ -240,9 +240,9 @@ function prompt(question) {
  * Wait for a save to land in POLICIES_DIR. Resolves with the source that
  * triggered ("watch" | "enter" | "timeout"). Filesystem-signaled by default;
  * Enter is a parallel path for real terminals; timeout is the safety net.
- * The whole reason this exists instead of a plain readline prompt: Claude
- * Code's Bash tool doesn't attach an interactive stdin, so the previous
- * `await prompt("Press Enter…")` blocked forever and the coupling stalled
+ * The whole reason this exists instead of a plain readline prompt: an agent's
+ * shell tool doesn't attach an interactive stdin, so a plain
+ * `await prompt("Press Enter…")` blocks forever and the coupling stalls
  * after the browser save landed on disk.
  */
 function waitForPolicySave(before, timeoutMs) {

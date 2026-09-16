@@ -58,6 +58,14 @@ node plugin/agy/run.mjs \
 
 One `agy --print` invocation may end before the pipeline does. `run.mjs` reads the `conversation_id` from the stream, and while `SUMMARY.md` is absent and agy exited 0, re-invokes with `--conversation <id>` and a short resume prompt, up to `--max-turns`. The stream of every invocation is concatenated, and the event reader differences the cumulative `usage` counters so each turn is priced once.
 
+## Choosing a policy in the console
+
+```bash
+npm run console
+```
+
+Opens the policy console at http://127.0.0.1:3000 (`plugin/policy-console/`): a gallery of the shipped presets with the agy driver pin on each card, and an editor that customizes models, per-phase routing and thinking into a new saved policy under `plugin/config/policies/`. The `driver:` block and `hard_cost_cap_usd` are shown and carried into the saved file as-is; the pin is not a per-project choice. `plugin/scripts/setup-policy.mjs` runs the same page during setup and writes the chosen name to `.sdlc/project.json`.
+
 ## Offline smoke run
 
 Before any paid run, drive the whole chain against the stub `agy` in `tools/test/fixtures/fake-agy/`. It speaks the recorded stream-json shapes, needs two invocations (so the resume loop runs), and makes one real $0 bridge call through the dispatch fallback:

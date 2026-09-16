@@ -12,7 +12,8 @@
     "run": "node plugin/agy/run.mjs",
     "report": "node tools/report.mjs",
     "test": "node --test tools/test/*.test.mjs && node tools/test-mcp.mjs",
-    "smoke": "node plugin/agy/run.mjs --allow-unverified-pin --gates=auto-approve --policy=antigravity-flash38-plus-haiku45 --agy-bin=tools/test/fixtures/fake-agy/agy"
+    "smoke": "node plugin/agy/run.mjs --allow-unverified-pin --gates=auto-approve --policy=antigravity-flash38-plus-haiku45 --agy-bin=tools/test/fixtures/fake-agy/agy",
+    "console": "node plugin/policy-console/policy-server.mjs --port 3000"
   },
   "license": "MIT",
   "repository": {

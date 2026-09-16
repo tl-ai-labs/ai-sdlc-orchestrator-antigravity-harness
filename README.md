@@ -30,6 +30,7 @@ The conductor authors no shipped content. Every requirements document, design, p
 | `plugin/agy/hooks/`, `plugin/hooks.json` | The write-contract PreToolUse guard and the bridge-call heartbeat, in agy's hook format |
 | `plugin/agy/verify-setup.mjs`, `plugin/agy/env-checks.mjs` | Offline setup check and repair (`npm run verify -- --fix`) |
 | `plugin/agy/manifest.mjs` | Writes `manifest.json` from the run directory: the bridge's rollups plus `harness`, `usage` and `cost` (three labeled lines) |
+| `plugin/policy-console/` | The one UI: a local page (`npm run console`, then http://127.0.0.1:3000) to pick or customize a routing policy. Shows the agy driver pin on every card and carries it into saved policies |
 | `.agents/plugins.json` | Registers `plugin/` with agy from the repo. Nothing is written under `~/.gemini/` |
 | `docs/verification/p1-agy-runtime.md` | Numbered runtime checks. Every pin cites one |
 | `examples/*/brief.md` | Briefs. `quick-demo` is the first paid run |
