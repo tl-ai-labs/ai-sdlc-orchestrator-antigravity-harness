@@ -68,8 +68,9 @@ export function costLines({ dispatched, modeled, policy, pin, env = process.env 
     input_tokens_cached: events.reduce((s, e) => s + (e.input_tokens_cached ?? 0), 0),
     output_tokens: events.reduce((s, e) => s + (e.output_tokens ?? 0), 0),
   });
-  const claude = dispatched.filter((e) => claudeModels.has(e.model));
-  const gemini = dispatched.filter((e) => !claudeModels.has(e.model));
+  const billed = dispatched.filter((e) => e.model && e.provenance !== "none");
+  const claude = billed.filter((e) => claudeModels.has(e.model));
+  const gemini = billed.filter((e) => !claudeModels.has(e.model));
   const wallet = claudeWallet(env);
   const door = geminiDoor(policy, env);
   return [

@@ -115,6 +115,8 @@ test("costLines partitions bridge events by the policy's claude-cli models", () 
   assert.equal(lines.find((l) => l.line === "claude_worker").cost_usd, 1);
   assert.equal(lines.find((l) => l.line === "gemini_workers").cost_usd, 2);
   assert.equal(lines.find((l) => l.line === "driver").cost_usd, 0);
+  const withNone = costLines({ dispatched: [ev({ model: null, provenance: "none", cost_usd: 0 })], modeled: [], policy, pin: null, env: {} });
+  assert.equal(withNone.find((l) => l.line === "gemini_workers").calls, 0, "a provenance:none receipt is not a worker call");
 });
 
 test("a run with no telemetry at all still yields a manifest, with empty dispatched sums", () => {

@@ -58,6 +58,18 @@ node plugin/agy/run.mjs \
 
 One `agy --print` invocation may end before the pipeline does. `run.mjs` reads the `conversation_id` from the stream, and while `SUMMARY.md` is absent and agy exited 0, re-invokes with `--conversation <id>` and a short resume prompt, up to `--max-turns`. The stream of every invocation is concatenated, and the event reader differences the cumulative `usage` counters so each turn is priced once.
 
+## Offline smoke run
+
+Before any paid run, drive the whole chain against the stub `agy` in `tools/test/fixtures/fake-agy/`. It speaks the recorded stream-json shapes, needs two invocations (so the resume loop runs), and makes one real $0 bridge call through the dispatch fallback:
+
+```bash
+mkdir -p /tmp/smoke && cp examples/quick-demo/brief.md /tmp/smoke/brief.md
+npm run smoke -- --project-root=/tmp/smoke --output-dir=/tmp/smoke/.sdlc --run-id=smoke1
+node tools/report.mjs /tmp/smoke/.sdlc
+```
+
+`tools/test/smoke-run.test.mjs` runs the same thing under `npm test`. Nothing the stub emits is a measurement; every figure is made up and labeled modeled.
+
 ## The run directory
 
 | File | Written by | What |

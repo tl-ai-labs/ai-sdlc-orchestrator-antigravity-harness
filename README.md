@@ -52,6 +52,12 @@ A headless run, dry first:
 node plugin/agy/run.mjs --brief=examples/quick-demo/brief.md --project-root=/path/to/empty/dir --output-dir=/path/to/empty/dir/.sdlc --gates=auto-approve --dry-run
 ```
 
+An offline end-to-end run against the stub `agy` (no sign-in, no credentials, $0):
+
+```bash
+mkdir -p /tmp/smoke && cp examples/quick-demo/brief.md /tmp/smoke/brief.md && npm run smoke -- --project-root=/tmp/smoke --output-dir=/tmp/smoke/.sdlc && node tools/report.mjs /tmp/smoke/.sdlc
+```
+
 [docs/running.md](docs/running.md) has the flags, the resume loop and what the run directory holds.
 
 ## Standing rules
