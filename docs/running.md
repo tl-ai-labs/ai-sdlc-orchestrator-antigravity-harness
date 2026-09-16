@@ -71,7 +71,7 @@ One `agy --print` invocation may end before the pipeline does. `run.mjs` reads t
 | `driver-stderr.log` | `run.mjs` | agy's stderr, where soft-denials and hook notices land |
 | `driver-cost-modeled.jsonl` | `run.mjs` | One `provenance: "modeled"` event per turn at the driver card |
 | `driver-manifest.json` | `run.mjs` | The pin, exit status, invocations, completion, modeled driver cost |
-| `manifest.json` | `plugin/agy/manifest.mjs` | The code-written run record the console and the store ingest |
+| `manifest.json` | `run.mjs` at the end, via `plugin/agy/manifest.mjs` | The code-written run record: the bridge's rollups plus `harness`, `usage` and `cost` with the three labeled lines. Rebuild any time with `node plugin/agy/manifest.mjs <dir>` |
 | `SUMMARY.md` | the conductor | The completion signal |
 
 `node tools/report.mjs <dir>` prints the cost report, keeping the modeled driver line apart from the cash lines.

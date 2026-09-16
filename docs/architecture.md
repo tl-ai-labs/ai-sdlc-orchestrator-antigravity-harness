@@ -52,3 +52,16 @@ The policy's top-level `driver:` block carries `model_name`, `reasoning.effort`,
 ## Plugin discovery
 
 `.agents/plugins.json` registers `./plugin` from the repo (`json_configs.md`). `run.mjs` launches agy with the repo root as cwd for that reason and adds the project with `--add-dir`. Nothing is written under `~/.gemini/`. If agy does not expand `${VAR}` in a plugin's `mcp_config.json` (check 5), `--inline-env` builds a throwaway workspace under the OS temp dir whose `.agents/plugins/mmo/` is the shipped plugin with the credentials inlined, and removes it after the run.
+
+## Hook mapping from the Claude Code harness
+
+agy has five hook events (`hooks.md`): `PreToolUse`, `PostToolUse`, `PreInvocation`, `PostInvocation`, `Stop`. No `SessionStart`, no `UserPromptSubmit`.
+
+| Claude Code hook | Purpose there | Here |
+|---|---|---|
+| `PreToolUse` on `Write\|Edit` | Brownfield write contract | `PreToolUse` on the file-writing step types and `run_command`, `plugin/agy/hooks/write-contract-check.mjs`, reply `{"decision": …}` |
+| `PostToolUse` on `mcp__…execute_with_model` | Heartbeat beside the bridge's own telemetry | `PostToolUse` on `mcp_tool`, `plugin/agy/hooks/heartbeat.mjs` |
+| `Stop` → auto-ship (governance store) | Ship the run record when the loop ends | `Stop` maps directly; the shipping command is the store's, not this repo's, and is added to `plugin/hooks.json` when the store's hook lands |
+| `SessionStart`, `UserPromptSubmit` | Session hydration, prompt-time checks | `PreInvocation` (fires before every model call; use `injectSteps` with an `ephemeralMessage`) |
+
+Hook commands run with cwd = the directory containing `hooks.json` (the plugin dir), so `plugin/hooks.json` names scripts relative to it and no `${CLAUDE_PLUGIN_ROOT}` exists.

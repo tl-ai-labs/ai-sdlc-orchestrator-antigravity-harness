@@ -12,7 +12,7 @@ The conductor authors no shipped content. Every requirements document, design, p
 
 ## Status
 
-**P3 — driver layer.** The plugin, bridge, policies, prompts and the headless driver (`plugin/agy/`) are in place; the offline test suite passes and `run.mjs --dry-run` prints the pinned invocation. The pin's live checks in [docs/verification/p1-agy-runtime.md](docs/verification/p1-agy-runtime.md) (1, 2, 4, 5, 6) are still pending a signed-in `agy` session, so `run.mjs` refuses a paid run unless told to stamp the pin as unverified. No measured run has been made.
+**P4 — records and parity.** The plugin, bridge, policies, prompts, the headless driver (`plugin/agy/`) and the code-written `manifest.json` are in place; the offline test suite passes and `run.mjs --dry-run` prints the pinned invocation. The pin's live checks in [docs/verification/p1-agy-runtime.md](docs/verification/p1-agy-runtime.md) (1, 2, 4, 5, 6) are still pending a signed-in `agy` session, so `run.mjs` refuses a paid run unless told to stamp the pin as unverified. No measured run has been made.
 
 ## Layout
 
@@ -29,6 +29,7 @@ The conductor authors no shipped content. Every requirements document, design, p
 | `plugin/agy/dispatch.mjs` | Pattern (b): the conductor shells out to this when its session binds no bridge tool; it speaks MCP via `mcp/model-dispatch/src/driverClient.ts` |
 | `plugin/agy/hooks/`, `plugin/hooks.json` | The write-contract PreToolUse guard and the bridge-call heartbeat, in agy's hook format |
 | `plugin/agy/verify-setup.mjs`, `plugin/agy/env-checks.mjs` | Offline setup check and repair (`npm run verify -- --fix`) |
+| `plugin/agy/manifest.mjs` | Writes `manifest.json` from the run directory: the bridge's rollups plus `harness`, `usage` and `cost` (three labeled lines) |
 | `.agents/plugins.json` | Registers `plugin/` with agy from the repo. Nothing is written under `~/.gemini/` |
 | `docs/verification/p1-agy-runtime.md` | Numbered runtime checks. Every pin cites one |
 | `examples/*/brief.md` | Briefs. `quick-demo` is the first paid run |

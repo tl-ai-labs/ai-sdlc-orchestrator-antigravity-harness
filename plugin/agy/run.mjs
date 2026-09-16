@@ -26,7 +26,7 @@
  */
 
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync as spawnSyncFn } from "node:child_process";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
@@ -34,6 +34,7 @@ import { parse as parseYaml } from "yaml";
 import { conversationIdFrom, modeledDriverCostEvents, parseEventStream } from "./telemetry/event-reader.mjs";
 import { assertPinnedInvocation, driverSlug, findPinRejection, pendingPinChecks, readPin } from "./telemetry/fairnessPin.mjs";
 import { defaultRunRoot, materialiseRunRoot, removeRunRoot } from "./runRoot.mjs";
+import { buildHarnessManifest, agyVersion } from "./manifest.mjs";
 
 const AGY_DIR = dirname(fileURLToPath(import.meta.url));
 export const PLUGIN_ROOT = dirname(AGY_DIR);
@@ -400,8 +401,18 @@ async function main(args) {
       pin_rejection: rejection,
       events_captured: events.length,
       inline_env: inlineEnv,
+      agy_version: agyVersion((cmd, a, o) => spawnSyncFn(agyBin, a, o)),
     };
     writeFileSync(join(outputDir, "driver-manifest.json"), JSON.stringify(manifest, null, 2) + "\n", "utf-8");
+
+    // manifest.json is written by code, never by the model. Failing here must
+    // not lose the run: the driver files above are enough to rebuild it later.
+    try {
+      const full = buildHarnessManifest({ runDir: outputDir, policyName, runId, version: manifest.agy_version });
+      writeFileSync(join(outputDir, "manifest.json"), JSON.stringify(full, null, 2) + "\n", "utf-8");
+    } catch (err) {
+      console.error(`run: manifest.json not written (${err?.message ?? err}); rebuild with node plugin/agy/manifest.mjs '${outputDir}'`);
+    }
 
     if (rejection) {
       console.error(`run: agy rejected the pinned model — ${rejection}`);
