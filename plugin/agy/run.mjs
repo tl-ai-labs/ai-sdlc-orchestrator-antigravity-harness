@@ -120,7 +120,7 @@ export function renderHandover({ mode, intent, seed } = {}) {
  */
 export function renderPrompt(template, values) {
   const rendered = template
-    .replace(/\$\{CLAUDE_PLUGIN_ROOT\}/g, () => String(values.PLUGIN_ROOT ?? "${CLAUDE_PLUGIN_ROOT}"))
+    .replace(/\$\{(?:CLAUDE|MMO)_PLUGIN_ROOT\}/g, () => String(values.PLUGIN_ROOT ?? "${MMO_PLUGIN_ROOT}"))
     .replace(/\{\{([A-Z_]+)\}\}/g, (whole, key) =>
       Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : whole,
     );

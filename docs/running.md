@@ -4,7 +4,7 @@ Two shapes. Interactive is how you build and debug the plugin; headless is how a
 
 ## Interactive
 
-Open `agy` in the repo root. `.agents/plugins.json` registers `plugin/` as the `mmo` plugin; `/plugins` lists it, `/mcp` shows `model-dispatch`, `/skills` lists the entry points. Invoke a skill, answer the gates by hand. Credentials come from the shell that launched `agy` (see [SETUP.md](../SETUP.md)).
+Run `node tools/setup.mjs --project-root <project>` once (README, "Setup — the two-prompt flow"); it writes `<project>/.agents/plugins.json` pointing at this clone. Then open `agy` in the project — or in the repo root, where the committed registration already applies. `.agents/plugins.json` registers `plugin/` as the `mmo` plugin; `/plugins` lists it, `/mcp` shows `model-dispatch`, `/skills` lists the entry points. Invoke a skill, answer the gates by hand. Credentials come from the shell that launched `agy` (see [SETUP.md](../SETUP.md)).
 
 ## Headless
 

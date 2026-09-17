@@ -1,6 +1,6 @@
 ---
 name: brownfield-guide
-description: The shared seven-step brownfield operating manual. Every brownfield entry point — /mmo:brownfield and the seven per-job commands (/mmo:bugfix, /mmo:docs, /mmo:test, /mmo:refactor, /mmo:deps, /mmo:feature-new, /mmo:feature-extend) — points here. Step 4 branches on an optional handover the invoking command supplies: intent (job type already chosen) and seed_description (the user's own words for the job).
+description: The shared seven-step brownfield operating manual. Every brownfield entry point — the `brownfield` skill and the seven per-job commands (the `bugfix` skill, the `docs` skill, the `test` skill, the `refactor` skill, the `deps` skill, the `feature-new` skill, the `feature-extend` skill) — points here. Step 4 branches on an optional handover the invoking command supplies: intent (job type already chosen) and seed_description (the user's own words for the job).
 ---
 
 You are Claude Code, following this operating manual. Work through the steps in order. Do not skip
@@ -19,7 +19,7 @@ setup is one-time per machine and happens separately.
 - `seed_description:` present and non-empty — the user's own words for the job, typed after the
   command. Step 4b treats this as the answer to the interview's first question and asks only the
   remaining ones.
-- Neither present (the plain `/mmo:brownfield` case) — step 4 runs exactly as written below: ask
+- Neither present (the plain `the `brownfield` skill` case) — step 4 runs exactly as written below: ask
   which job type, then run the full interview.
 
 ---
@@ -29,7 +29,7 @@ setup is one-time per machine and happens separately.
 Before anything else, invoke:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/session-hydrate.mjs" --json
+node "${MMO_PLUGIN_ROOT}/scripts/session-hydrate.mjs" --json
 ```
 
 Read the JSON. Three cases:
@@ -61,7 +61,7 @@ all steps still valid"* and skip to step 3.
 Script-side steps (2, 4, 5, 6) — you invoke via Bash:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pre-check.mjs" --run
+node "${MMO_PLUGIN_ROOT}/scripts/pre-check.mjs" --run
 ```
 
 Agent-side steps (1 = discovery smoke, 3 = dispatch smoke) — you run yourself:
@@ -70,7 +70,7 @@ Agent-side steps (1 = discovery smoke, 3 = dispatch smoke) — you run yourself:
    with `mode: first-time` (or `refresh` if a baseline exists). Watch for a non-git-repo refusal
    or any hard error. On pass, record it:
    ```bash
-   echo '{"note":"Tier 1 completed cleanly"}' | node "${CLAUDE_PLUGIN_ROOT}/scripts/pre-check.mjs" --record discovery pass
+   echo '{"note":"Tier 1 completed cleanly"}' | node "${MMO_PLUGIN_ROOT}/scripts/pre-check.mjs" --record discovery pass
    ```
 
 3. **Dispatch smoke.** Construct a trivial `{ id: "smoke-1", phase: "codegen", task_type:
@@ -79,7 +79,7 @@ Agent-side steps (1 = discovery smoke, 3 = dispatch smoke) — you run yourself:
    mechanical for `opus-plus-flash`; just premium for `opus-only`). If both return their expected
    output within the timeout, record pass:
    ```bash
-   echo '{"tiers_tested":["opus","gemini-flash"]}' | node "${CLAUDE_PLUGIN_ROOT}/scripts/pre-check.mjs" --record dispatch pass
+   echo '{"tiers_tested":["opus","gemini-flash"]}' | node "${MMO_PLUGIN_ROOT}/scripts/pre-check.mjs" --record dispatch pass
    ```
 
 If any pre-check step fails, **do not proceed to Gate 0.** Print the reported remediation and
@@ -170,18 +170,13 @@ template from [plugin/skills/pipeline/SKILL.md](/plugin/skills/pipeline/SKILL.md
 
 - **Stack** — top-detected from `baseline.stacks`. Ask if it's right; accept overrides.
 - **Test command** — `baseline.test_command_proposed`. Accept an override.
-- **Auth mode** — ask `vendor` (billed via API keys) or `estimated` (Claude Code subscription
-  auth, cost is an estimate). Required — the orchestrator aborts without it. `estimated` also
-  requires `CLAUDE_CODE_SUBAGENT_MODEL` to have been set before `claude` launched (it is what
-  the driver subagents execute on): from a terminal, exported or in the `env` block of the
-  project's `.claude/settings.local.json`; from the desktop app, in the `env` block of
-  `~/.claude/settings.json`, since the app ignores project settings files. The orchestrator's
-  run-start driver-model check stops the run, printing where to set it, when it is unset or
-  disagrees with the policy's driver model.
+- **Auth mode** — `vendor`, the only mode on this runtime: every call is billed through the
+  bridge on the credentials in the shell that launched agy. Required — the orchestrator aborts
+  without it. State it rather than ask; `estimated` belongs to the Claude Code harness.
 - **Policy** — read `payload.project.default_policy` from the session-hydrate output already
   captured in step 1 of this command. This is what setup wrote to `.sdlc/project.json`. If
   it is null, setup was not completed for this project — abort Gate 0 and tell the user to
-  run setup first (see [SETUP.md](/SETUP.md) §5b — the one setup step that opens a browser
+  run setup first (see [SETUP.md](/SETUP.md) §5 — the one setup step that opens a browser
   for the policy console). Do not silently default and do not launch the console from here.
   Otherwise show the resolved name; accept, or accept an on-disk policy name for this run only
   (e.g. `opus-only`) — a per-run override does not overwrite the project default.
@@ -254,7 +249,7 @@ Do not propose a follow-up run.
 
 # Flag surface (headless / repeat runs)
 
-`/mmo:pass` is the flag-driven twin of every brownfield entry point for scripted / CI invocations:
+`the `pass` skill` is the flag-driven twin of every brownfield entry point for scripted / CI invocations:
 
 ```
 --mode brownfield --intent <docs|bugfix|feature-extend|feature-new|refactor|test|deps>

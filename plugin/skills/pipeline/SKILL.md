@@ -5,7 +5,7 @@ description: The end-to-end AI-SDLC workflow definition consumed by the orchestr
 
 # AI-SDLC Workflow — Orchestrator Playbook
 
-This skill is the source of truth for the orchestrator. When invoked under `/mmo:pass`, the orchestrator follows the state machine below.
+This skill is the source of truth for the orchestrator. When invoked under `the `pass` skill`, the orchestrator follows the state machine below.
 
 ---
 
@@ -248,7 +248,7 @@ Read all events in `<telemetry_path>`. Build rollup manifest using the `buildMan
 Then, **after** the manifest is on disk, run the orchestrator-overhead collector — telemetry holds dispatched work only, and this session's own loop is invisible to it in both auth modes:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/scripts/collect-orchestrator-usage.mjs" <output_dir> --project-root "$(pwd)"
+node "${MMO_PLUGIN_ROOT}/scripts/collect-orchestrator-usage.mjs" <output_dir> --project-root "$(pwd)"
 ```
 
 `--project-root` must be the same directory the run's `mmo-log.mjs` calls used: the collector reads this run's `run.start` and `run.end` lines from `<project-root>/.sdlc/runs/<run-id>/orchestrator.log` to find the run's own command turn in the session transcript, which is where its window opens (the manifest's `started_at` is only the first dispatched event, after the driver's own setup work; without the log the window is approximate and labelled so). On success it appends one `tier: "orchestrator"` event and patches the manifest with `orchestrator_overhead` + `true_total_cost_usd`; quote the **true total** in SUMMARY.md and label the dispatched figure as such. The figure is **provisional** — you run the collector from inside a session that has not ended, so it misses this session's own tail. Print the command with `<output_dir>` and `$(pwd)` resolved to real paths, in your final message and in SUMMARY.md, under **Provisional — re-run after closing this session**. On failure (non-zero exit), do not block the run: label every cost in SUMMARY.md *dispatched work only — excludes orchestrator overhead* and note the collector command. Never blend the two figures. Keep the run's `claude -p --output-format json` result beside the manifest as `claude-session.json` when you have it: the collector checks itself against it model by model, books the receipt's token counts at the price list when the window is provably the invocation the receipt billed (reporting the share Claude Code billed but never logged), and exits 3 (nothing written) otherwise.
@@ -286,7 +286,7 @@ never skip it on brownfield.
 
 ## Intent matrix — brownfield only
 
-**Applies only when `mode: brownfield`.** Greenfield (`/mmo:greenfield`) runs the full pipeline
+**Applies only when `mode: brownfield`.** Greenfield (`the `greenfield` skill`) runs the full pipeline
 described above with no matrix-based branching.
 
 In brownfield, one state machine handles seven intents. Which phases fire — and what shape their
@@ -332,7 +332,7 @@ main-loop Claude Code session displays verbatim and waits for user input on. The
 comes back to the subagent as a `{ gate_response: "approved" | "revise: <text>" | "abort" }`
 argument on the next invocation. **Persist the gate-pending state to `.sdlc/local/state.json`
 before emitting the message** — if the session dies mid-gate, session-hydrate detects a
-non-terminal state and re-prompts on next `/mmo:brownfield` invocation. No new command needed.
+non-terminal state and re-prompts on next `the `brownfield` skill` invocation. No new command needed.
 
 ### Gate 0 — Brownfield only, before Gate 1
 
@@ -344,15 +344,15 @@ non-terminal state and re-prompts on next `/mmo:brownfield` invocation. No new c
 > - **Test command:** `<detected>` — enter to accept, or paste the command.
 > - **Policy:** `<the default_policy field setup wrote to .sdlc/project.json>` — accept, or
 >   name another on-disk policy for this run only (e.g. `opus-only`). To change the project's
->   persistent default, re-run setup (`node "${CLAUDE_PLUGIN_ROOT}/scripts/setup-policy.mjs"`
+>   persistent default, re-run setup (`node "${MMO_PLUGIN_ROOT}/scripts/setup-policy.mjs"`
 >   — this is the one command that opens a browser; every other setup step is terminal-only).
 > - **Existing AI setup:** `<verbatim list from Tier 1 group 6>` — is any of this
 >   authoritative and off-limits? **(default: OFF-LIMITS, do not touch)**
-> - **Intent:** `<intent picked in step 4a of /mmo:brownfield>`
+> - **Intent:** `<intent picked in step 4a of the `brownfield` skill>`
 > - **File scope:**
 >   - allowlist: `<paths proposed by the intent brief>` — accept / edit
 >   - off-limits: **project defaults from `.sdlc/project.json.off_limits_default`** apply
->     (`.env*`, `.mcp.json`, `node_modules/**`, `.cursor/rules/**`, `.claude/settings.local.json`,
+>     (`.env*`, `.mcp.json`, `node_modules/**`, `.cursor/rules/**`, other AI tools' settings files,
 >     `dist/**`, `.sdlc/**`, `.git/**`) — add anything else this ticket must not touch
 >   - AI configs detected in the repo are added on top (see previous bullet)
 > - **Repo-state risks (if any):** `<LFS / submodules / failing tests / encrypted secrets>`
