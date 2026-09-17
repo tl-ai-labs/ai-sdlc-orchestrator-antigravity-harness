@@ -19,23 +19,22 @@ test("README carries prompt 1 (the repo URL, verbatim) and prompt 2 (a new sessi
   assert.match(readme, /## Setup — the two-prompt flow/);
   assert.match(readme, /Set up this plugin from this repo - https:\/\/github\.com\/tl-ai-labs\/ai-sdlc-orchestrator-antigravity-harness/);
   assert.match(readme, /\*\*Prompt 2 — run\.\*\* Start a \*\*new `agy` session in the same folder\*\*/);
-  assert.match(readme, /\/greenfield/);
-  assert.match(readme, /\/brownfield/);
+  assert.match(readme, /\/mmo:greenfield/);
+  assert.match(readme, /\/mmo:brownfield/);
   assert.match(readme, /node tools\/setup\.mjs --project-root/);
   assert.ok(!/agy plugin install/.test(readme.replace(/Do not run `agy plugin install`/g, "")), "never a global install");
 });
 
-test("README's skills table names every shipped entry-point skill and no /mmo: command", () => {
+test("README's skills table names every shipped skill under its live /mmo: name", () => {
   const readme = read("README.md");
   const skills = readdirSync(join(ROOT, "plugin", "skills"), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
-  for (const s of skills) assert.match(readme, new RegExp(`\\[\`${s}\`\\]\\(plugin/skills/${s}/SKILL\\.md\\)|\`${s}\``), s);
-  assert.ok(!/\/mmo:/.test(readme));
+  for (const s of skills) assert.match(readme, new RegExp(`\`/mmo:${s}\`|\`${s}\``), s);
 });
 
 test("INSTALL.md and SETUP.md describe the project-folder flow: clone beside, register, new session", () => {
   const install = read("INSTALL.md");
   assert.match(install, /tools\/setup\.mjs --project-root/);
-  assert.match(install, /\.agents\/plugins\.json/);
+  assert.match(install, /\.agents\/plugins\/mmo/);
   assert.match(install, /new\*\* `agy` session/);
   const setup = read("SETUP.md");
   assert.match(setup, /Arm A/); assert.match(setup, /Arm B/);
@@ -43,17 +42,17 @@ test("INSTALL.md and SETUP.md describe the project-folder flow: clone beside, re
   assert.match(setup, /Before any paid run/);
 });
 
-test("entry-point skills use ${MMO_PLUGIN_ROOT} and skill names, never Claude Code's variable or slash commands", () => {
+test("entry-point skills use ${MMO_PLUGIN_ROOT} and never Claude Code's variable or settings paths", () => {
   const skills = readdirSync(join(ROOT, "plugin", "skills"), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
   for (const s of skills) {
     const text = read(join("plugin", "skills", s, "SKILL.md"));
     assert.ok(!text.includes("${CLAUDE_PLUGIN_ROOT}"), `${s}: \${CLAUDE_PLUGIN_ROOT}`);
-    assert.ok(!/\/mmo:[a-z-]+/.test(text), `${s}: /mmo: reference`);
     assert.ok(!/~\/\.claude|\.claude\/settings/.test(text), `${s}: Claude Code settings path`);
   }
   const rules = read("plugin/rules/AGENTS.md");
   assert.match(rules, /MMO_PLUGIN_ROOT/, "the rules say how to resolve it");
-  assert.match(rules, /include_only/);
+  assert.match(rules, /\.agents\/plugins\/mmo/);
+  assert.match(rules, /call_mcp_tool/, "the rules name how MCP tools are invoked interactively (check 1)");
 });
 
 test("the pass skill accepts only --auth=vendor on this runtime", () => {

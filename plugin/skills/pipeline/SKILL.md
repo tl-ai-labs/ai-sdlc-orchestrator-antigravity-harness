@@ -5,7 +5,7 @@ description: The end-to-end AI-SDLC workflow definition consumed by the orchestr
 
 # AI-SDLC Workflow — Orchestrator Playbook
 
-This skill is the source of truth for the orchestrator. When invoked under `the `pass` skill`, the orchestrator follows the state machine below.
+This skill is the source of truth for the orchestrator. When invoked under ``/mmo:pass``, the orchestrator follows the state machine below.
 
 ---
 
@@ -286,7 +286,7 @@ never skip it on brownfield.
 
 ## Intent matrix — brownfield only
 
-**Applies only when `mode: brownfield`.** Greenfield (`the `greenfield` skill`) runs the full pipeline
+**Applies only when `mode: brownfield`.** Greenfield (``/mmo:greenfield``) runs the full pipeline
 described above with no matrix-based branching.
 
 In brownfield, one state machine handles seven intents. Which phases fire — and what shape their
@@ -332,7 +332,7 @@ main-loop Claude Code session displays verbatim and waits for user input on. The
 comes back to the subagent as a `{ gate_response: "approved" | "revise: <text>" | "abort" }`
 argument on the next invocation. **Persist the gate-pending state to `.sdlc/local/state.json`
 before emitting the message** — if the session dies mid-gate, session-hydrate detects a
-non-terminal state and re-prompts on next `the `brownfield` skill` invocation. No new command needed.
+non-terminal state and re-prompts on next ``/mmo:brownfield`` invocation. No new command needed.
 
 ### Gate 0 — Brownfield only, before Gate 1
 
@@ -348,7 +348,7 @@ non-terminal state and re-prompts on next `the `brownfield` skill` invocation. N
 >   — this is the one command that opens a browser; every other setup step is terminal-only).
 > - **Existing AI setup:** `<verbatim list from Tier 1 group 6>` — is any of this
 >   authoritative and off-limits? **(default: OFF-LIMITS, do not touch)**
-> - **Intent:** `<intent picked in step 4a of the `brownfield` skill>`
+> - **Intent:** `<intent picked in step 4a of `/mmo:brownfield`>`
 > - **File scope:**
 >   - allowlist: `<paths proposed by the intent brief>` — accept / edit
 >   - off-limits: **project defaults from `.sdlc/project.json.off_limits_default`** apply

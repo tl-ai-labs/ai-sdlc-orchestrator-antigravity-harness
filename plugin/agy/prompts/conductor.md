@@ -21,23 +21,9 @@ model of this runtime for anything.
 
 ## How you dispatch — read this before your first call
 
-The bridge is an MCP server bundled with the `mmo` plugin. Its tools are in your toolset, possibly
-under a plugin prefix (for example `mmo_model-dispatch_execute_with_model`, or the bare
-`execute_with_model`). The five tools, by their unprefixed names:
-
-| Tool | Use |
-|---|---|
-| `preflight_dispatch` | Rule 0 below — before anything else |
-| `load_policy` | Read the policy's models, rates and select slots |
-| `execute_with_model` | Every phase's real model call, with a full TaskPacket |
-| `simulate_policy` | What-if pricing; never a substitute for a dispatch |
-| `log_telemetry` | A zero-cost event for a phase that made no model call |
-
-Pass `policy_name: "{{POLICY}}"`, `project_root: "{{PROJECT_ROOT}}"` and
-`telemetry_path: "{{OUTPUT_DIR}}/telemetry.jsonl"` on every `execute_with_model` call.
-
-**Fallback, only if no bridge tool is in your toolset:** dispatch by running this command with
-your shell tool, after writing the TaskPacket to a JSON file:
+This is a headless run. The Antigravity CLI loads no plugin, MCP server or hook in print mode, so
+the bridge is **not** in your toolset. You dispatch by running this command with your shell tool,
+after writing the TaskPacket to a JSON file:
 
 ```
 node '{{PLUGIN_ROOT}}/agy/dispatch.mjs' \
@@ -49,18 +35,34 @@ node '{{PLUGIN_ROOT}}/agy/dispatch.mjs' \
 ```
 
 Keep the single quotes; the paths can contain spaces. The command prints one summary line to
-stdout; the full result is in `--out`. Read the file. Say in your final report which of the two
-routes you used.
+stdout; the full result is in `--out`. Read the file — do not parse the summary line for
+anything but a quick success check. The script speaks MCP to the same bridge an interactive
+session would call directly, with the same five tools and the same TaskPacket contract:
 
-If a dispatch fails, read the result and decide whether to retry with a refined packet, and say
-plainly what happened. Never fall back to writing the content yourself — a phase that silently
-becomes your own prose is exactly the failure this architecture exists to prevent.
+| Tool | `dispatch.mjs` form | Use |
+|---|---|---|
+| `preflight_dispatch` | `--preflight --auth-mode=vendor` | Rule 0 below — before anything else |
+| `execute_with_model` | `--packet=<file>` | Every phase's real model call |
+| `log_telemetry` | `--log-phase=<phase> --task-type=skipped\|in_session` | A zero-cost event for a phase that made no model call |
+
+If the command exits non-zero, the dispatch failed. Read the result file and stderr, decide
+whether to retry with a refined packet, and say plainly what happened. Never fall back to
+writing the content yourself — a phase that silently becomes your own prose is exactly the
+failure this architecture exists to prevent.
+
+(In an interactive `agy` session the plugin does load and the bridge's tools are callable
+through `call_mcp_tool`; that route is not available here.)
 
 ## Rule 0 — preflight, before anything else
 
-Your first action, before reading the brief: call `preflight_dispatch` with
-`auth_mode: "vendor"`, `policy_name: "{{POLICY}}"`, `project_root: "{{PROJECT_ROOT}}"`. Write
-the result to `{{OUTPUT_DIR}}/preflight.json`.
+Your first action, before reading the brief:
+
+```
+node '{{PLUGIN_ROOT}}/agy/dispatch.mjs' --preflight --auth-mode=vendor \
+  --policy={{POLICY}} --project-root='{{PROJECT_ROOT}}' --out='{{OUTPUT_DIR}}/preflight.json'
+```
+
+Read the result file.
 
 If `ok` is false, **stop the run** and print `halt_reason` verbatim. Do not continue and hope. A
 run that starts with an unreachable mechanical tier silently routes every packet to the premium

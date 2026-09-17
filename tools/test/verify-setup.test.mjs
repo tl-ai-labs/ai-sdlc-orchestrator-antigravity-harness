@@ -110,11 +110,12 @@ test("DECLARED_ENV matches plugin/mcp_config.json exactly", () => {
   assert.deepEqual([...DECLARED_ENV].sort(), Object.keys(env).sort());
 });
 
-test("pluginDiscoveryState passes on the real repo and fails on a wrong registration", () => {
-  assert.deepEqual(pluginDiscoveryState(PLUGIN), { ok: true, problems: [] });
-  const bad = pluginDiscoveryState(PLUGIN, (p) => (p.endsWith("plugins.json") ? '{"entries":[{"path":"plugins"}]}' : readFileSync(p, "utf8")));
+test("pluginDiscoveryState passes on the real repo and fails when the mount is missing a piece", () => {
+  const real = pluginDiscoveryState(PLUGIN);
+  assert.deepEqual(real, { ok: true, problems: [], mount: join(ROOT, ".agents", "plugins", "mmo") });
+  const bad = pluginDiscoveryState(PLUGIN, readFileSync, (p) => !p.endsWith(join("mmo", "skills")));
   assert.equal(bad.ok, false);
-  assert.match(bad.problems[0], /does not register \.\/plugin/);
+  assert.match(bad.problems[0], /skills is missing \(the discovery mount\)/);
 });
 
 test("observePolicy reads the real default policy and its adapters", () => {

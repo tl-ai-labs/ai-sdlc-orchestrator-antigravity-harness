@@ -114,9 +114,9 @@ test("parseArgs handles --key=value and bare flags", () => {
   });
 });
 
-test("HARNESS_ROOT is the repo root that carries .agents/plugins.json — the launcher's cwd", () => {
+test("HARNESS_ROOT is the repo root that carries the .agents/plugins/mmo mount — the launcher's cwd", () => {
   assert.equal(HARNESS_ROOT, ROOT);
-  assert.ok(existsSync(join(HARNESS_ROOT, ".agents", "plugins.json")));
+  assert.ok(existsSync(join(HARNESS_ROOT, ".agents", "plugins", "mmo", "plugin.json")));
   assert.equal(PLUGIN_ROOT, join(ROOT, "plugin"));
 });
 
@@ -147,8 +147,9 @@ test("the shipped conductor prompt states the rules the study rests on", () => {
   const text = readFileSync(join(ROOT, "plugin", "agy", "prompts", "conductor.md"), "utf8");
   assert.match(text, /author no shipped content/);
   assert.match(text, /You are Gemini\. Opus 5 is a worker behind the bridge/);
-  assert.match(text, /execute_with_model/, "the MCP route names the bridge tool");
-  assert.match(text, /agy\/dispatch\.mjs/, "the fallback route names the dispatch script");
+  assert.match(text, /execute_with_model/, "the bridge tool is named");
+  assert.match(text, /agy\/dispatch\.mjs/, "headless dispatch goes through the script — print mode loads no plugin");
+  assert.match(text, /--preflight --auth-mode=vendor/, "rule 0 is the dispatch form");
   assert.match(text, /manifest\.json` is written by the launcher/, "the model does not write the manifest");
   assert.match(text, /'\{\{PLUGIN_ROOT\}\}\/agy\/dispatch\.mjs'/, "paths that may contain spaces are quoted");
 });
@@ -273,13 +274,14 @@ test("run.mjs --dry-run prints the pinned invocation without spawning agy, secre
   } finally { cleanup(dir); }
 });
 
-test("run.mjs refuses a paid run while the pin's live checks are pending, unless overridden", () => {
+test("run.mjs reaches the spawn without --allow-unverified-pin now that the headless checks pass", () => {
   const dir = tmp();
   try {
     writeFileSync(join(dir, "brief.md"), "# brief\n");
     const r = spawnSync(process.execPath, [RUN, `--project-root=${dir}`, "--agy-bin=/nonexistent/agy"], { encoding: "utf8" });
     assert.equal(r.status, 1);
-    assert.match(r.stderr, /not live-verified|could not launch/);
+    assert.match(r.stderr, /could not launch/);
+    assert.ok(!/not live-verified/.test(r.stderr));
   } finally { cleanup(dir); }
 });
 

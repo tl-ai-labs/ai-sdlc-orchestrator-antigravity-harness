@@ -4,7 +4,7 @@ Two shapes. Interactive is how you build and debug the plugin; headless is how a
 
 ## Interactive
 
-Run `node tools/setup.mjs --project-root <project>` once (README, "Setup — the two-prompt flow"); it writes `<project>/.agents/plugins.json` pointing at this clone. Then open `agy` in the project — or in the repo root, where the committed registration already applies. `.agents/plugins.json` registers `plugin/` as the `mmo` plugin; `/plugins` lists it, `/mcp` shows `model-dispatch`, `/skills` lists the entry points. Invoke a skill, answer the gates by hand. Credentials come from the shell that launched `agy` (see [SETUP.md](../SETUP.md)).
+Run `node tools/setup.mjs --project-root <project>` once (README, "Setup — the two-prompt flow"); it mounts the plugin as `<project>/.agents/plugins/mmo/`. Then open `agy` in the project — or in the repo root, where the committed mount already applies — and answer yes to the trust prompt. `/skills` lists `mmo:greenfield`, `mmo:brownfield`, `mmo:pass` and the rest; the bridge's tools are reached through `call_mcp_tool`. Invoke a skill, answer the gates by hand. Credentials come from the shell that launched `agy` (see [SETUP.md](../SETUP.md)).
 
 ## Headless
 
@@ -37,7 +37,7 @@ node plugin/agy/run.mjs \
 | `--agy-bin` | `agy` | Path to the binary when it is not on PATH |
 | `--inline-env` | off | Check-5 fallback: build a per-run root under the OS temp dir with credentials inlined into `mcp_config.json` |
 | `--keep-run-root` | off | Keep that root after the run, for inspection |
-| `--allow-unverified-pin` | off | Run while the pin's live checks are pending; stamps `pin.verified: false` in the manifest |
+| `--allow-unverified-pin` | off | Run while a pin check is pending (none is today); stamps `pin.verified: false` in the manifest |
 
 ### What the invocation pins
 
@@ -47,12 +47,16 @@ node plugin/agy/run.mjs \
 | `--dangerously-skip-permissions` | Print mode soft-denies every tool that would prompt | 6 |
 | no `--sandbox` | The bridge is a piped subprocess | 2 |
 | `--print-timeout 6h` | A pass runs hours | — |
-| cwd = repo root | `.agents/plugins.json` is what discovers the plugin | 10 |
+| cwd = repo root | Where the plugin mount lives; print mode loads it anyway only in name — see below | 10 |
 | `--add-dir <project>` | Mandatory; the workspace is otherwise the harness repo | — |
 
 ### The pin gate
 
-`docs/verification/p1-agy-runtime.md` says nothing may be pinned on a pending check. `plugin/agy/telemetry/fairnessPin.mjs` lists the checks the pin depends on (1, 2, 4, 5, 6) with their state; while any is pending, `run.mjs` refuses to spawn `agy` unless you pass `--allow-unverified-pin`, and then writes `pin.verified: false` into `driver-manifest.json`. Flip a check to `pass` only in the same commit that records its result in the doc.
+`docs/verification/p1-agy-runtime.md` says nothing may be pinned on a pending check. `plugin/agy/telemetry/fairnessPin.mjs` lists the checks the headless pin depends on (2, 4, 6, 10); all four passed live on 2026-09-17, so `run.mjs` runs without `--allow-unverified-pin` and writes `pin.verified: true`. If a check is ever set back to pending, the gate closes again.
+
+### Headless is plugin-less
+
+`agy -p` loads no workspace customization: no plugin, MCP server, hook or skill (check 1). A headless run therefore has no `/mmo:*` skills and no bridge tools in the model's toolset; the conductor prompt `run.mjs` renders tells the model to dispatch through `plugin/agy/dispatch.mjs`, which speaks MCP to the bridge itself. The write-contract hook does not fire headless — a headless brownfield run has no guard, and its record should say so.
 
 ### The resume loop
 

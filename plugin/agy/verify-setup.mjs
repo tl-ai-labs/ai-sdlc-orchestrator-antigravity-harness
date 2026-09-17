@@ -378,25 +378,30 @@ export function claudeArmState(env = {}, login = null) {
   return { arm: "none", detail: null };
 }
 
-/** The repo-level discovery contract: p1-agy-runtime.md checks 10 and 12. */
+/**
+ * The repo-level discovery contract (p1-agy-runtime.md check 10, live
+ * 2026-09-17): agy discovers a plugin as `<workspace>/.agents/plugins/<name>/`
+ * holding plugin.json, mcp_config.json, hooks.json, rules/ and skills/ —
+ * here symlinks into plugin/. The declared route (`.agents/plugins.json`)
+ * did not resolve on 1.2.5 and is not used.
+ */
 export function pluginDiscoveryState(pluginRoot, read = readFileSync, exists = existsSync) {
   const harnessRoot = dirname(pluginRoot);
-  const registration = join(harnessRoot, ".agents", "plugins.json");
+  const mount = join(harnessRoot, ".agents", "plugins", "mmo");
   const problems = [];
-  if (!exists(registration)) problems.push(`${registration} is missing`);
-  else {
-    try {
-      const reg = JSON.parse(read(registration, "utf8"));
-      const entry = (reg.entries ?? []).find((e) => e.path === "." && (e.include_only ?? []).includes("^plugin$"));
-      if (!entry) problems.push(`${registration} does not register ./plugin (entries[].path "." with include_only ["^plugin$"])`);
-    } catch (err) {
-      problems.push(`${registration} is not valid JSON: ${err.message}`);
-    }
-  }
   for (const file of ["plugin.json", "mcp_config.json", "hooks.json"]) {
     if (!exists(join(pluginRoot, file))) problems.push(`${join(pluginRoot, file)} is missing`);
+    if (!exists(join(mount, file))) problems.push(`${join(mount, file)} is missing (the discovery mount)`);
   }
-  return { ok: problems.length === 0, problems };
+  for (const dir of ["skills", "rules", "mcp", "agy"]) {
+    if (!exists(join(mount, dir))) problems.push(`${join(mount, dir)} is missing (the discovery mount)`);
+  }
+  try {
+    if (exists(join(mount, "plugin.json")) && JSON.parse(read(join(mount, "plugin.json"), "utf8")).name !== "mmo") problems.push(`${join(mount, "plugin.json")} does not name the plugin mmo`);
+  } catch (err) {
+    problems.push(`${join(mount, "plugin.json")} is not valid JSON: ${err.message}`);
+  }
+  return { ok: problems.length === 0, problems, mount };
 }
 
 // ─── decision logic ─────────────────────────────────────────────────────
@@ -455,7 +460,7 @@ export function evaluate({
       id: "plugin-discovery",
       severity: "blocking",
       message: `The plugin cannot be discovered from the repo: ${discovery.problems.join("; ")}.`,
-      fix: "Restore .agents/plugins.json and plugin/{plugin.json,mcp_config.json,hooks.json} from git — never `agy plugin install` this repo.",
+      fix: "Restore .agents/plugins/mmo/ (symlinks into plugin/) and plugin/{plugin.json,mcp_config.json,hooks.json} from git — never `agy plugin install` this repo.",
     });
   }
 

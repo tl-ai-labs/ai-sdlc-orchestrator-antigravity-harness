@@ -7,8 +7,8 @@ node plugin/agy/run.mjs
   │  builds the pinned argv, renders the conductor prompt and skills
   ▼
 agy --print <conductor.md> --output-format stream-json --model gemini-3.8-flash-high
-  │  discovers plugin/ from .agents/plugins.json, launches model-dispatch from plugin/mcp_config.json
-  │  Gemini conducts: reads the brief, builds TaskPackets, calls the bridge, writes artifacts
+  │  print mode loads no plugin: the rendered conductor prompt tells Gemini to dispatch through dispatch.mjs
+  │  Gemini conducts: reads the brief, builds TaskPackets, runs dispatch.mjs, writes artifacts
   ▼
 model-dispatch (MCP, stdio)             ← execute_with_model / preflight_dispatch / load_policy / …
   │  policy rules → adapter → model; appends telemetry.jsonl
@@ -31,9 +31,9 @@ plugin/agy/manifest.mjs builds manifest.json from telemetry.jsonl + the driver f
 
 ## Two dispatch routes
 
-**(a) MCP route, the default.** agy binds the bridge's tools into the model's toolset (`mcp_servers.md`), possibly under a plugin prefix. The conductor prompt names the five tools and the arguments to pass on every call.
+**(a) MCP route — interactive.** In a trusted workspace agy loads the plugin's `mcp_config.json`, starts the bridge, and exposes its tools through the generic `call_mcp_tool` (no per-tool binding). The rules name the server and tools.
 
-**(b) Dispatch fallback.** If a session binds no bridge tool, the conductor runs `node plugin/agy/dispatch.mjs --packet=… --out=…`, which spawns the same server as a stdio subprocess through `plugin/mcp/model-dispatch/src/driverClient.ts` and speaks MCP to it. Same tools, same TaskPacket contract; only who opens the socket differs. Which route ran is a line in the final report.
+**(b) Dispatch script — headless.** `agy -p` loads no plugin at all (check 1), so the conductor prompt `run.mjs` renders tells the model to run `node plugin/agy/dispatch.mjs --packet=… --out=…`, which spawns the same server as a stdio subprocess through `plugin/mcp/model-dispatch/src/driverClient.ts` and speaks MCP to it. Same tools, same TaskPacket contract; only who opens the socket differs. agy's sandbox does not kill it (check 2).
 
 ## Three cost lines
 
@@ -51,7 +51,7 @@ The policy's top-level `driver:` block carries `model_name`, `reasoning.effort`,
 
 ## Plugin discovery
 
-`.agents/plugins.json` registers `./plugin` from the repo (`json_configs.md`). `run.mjs` launches agy with the repo root as cwd for that reason and adds the project with `--add-dir`. Nothing is written under `~/.gemini/`. If agy does not expand `${VAR}` in a plugin's `mcp_config.json` (check 5), `--inline-env` builds a throwaway workspace under the OS temp dir whose `.agents/plugins/mmo/` is the shipped plugin with the credentials inlined, and removes it after the run.
+`.agents/plugins/mmo/` — symlinks into `plugin/` — is what agy discovers in a trusted workspace (check 10; the declared `.agents/plugins.json` route did not resolve). `tools/setup.mjs` builds the same mount in a project. Nothing is written under `~/.gemini/`. Headless runs do not depend on discovery at all (print mode loads nothing), so `--inline-env` is only relevant if a future agy loads plugins in print mode without expanding `${VAR}`.
 
 ## Hook mapping from the Claude Code harness
 

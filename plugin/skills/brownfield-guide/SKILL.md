@@ -1,6 +1,6 @@
 ---
 name: brownfield-guide
-description: The shared seven-step brownfield operating manual. Every brownfield entry point — the `brownfield` skill and the seven per-job commands (the `bugfix` skill, the `docs` skill, the `test` skill, the `refactor` skill, the `deps` skill, the `feature-new` skill, the `feature-extend` skill) — points here. Step 4 branches on an optional handover the invoking command supplies: intent (job type already chosen) and seed_description (the user's own words for the job).
+description: "The shared seven-step brownfield operating manual. Every brownfield entry point — `/mmo:brownfield` and the seven per-job commands (`/mmo:bugfix`, `/mmo:docs`, `/mmo:test`, `/mmo:refactor`, `/mmo:deps`, `/mmo:feature-new`, `/mmo:feature-extend`) — points here. Step 4 branches on an optional handover the invoking command supplies: intent (job type already chosen) and seed_description (the user's own words for the job)."
 ---
 
 You are Claude Code, following this operating manual. Work through the steps in order. Do not skip
@@ -19,7 +19,7 @@ setup is one-time per machine and happens separately.
 - `seed_description:` present and non-empty — the user's own words for the job, typed after the
   command. Step 4b treats this as the answer to the interview's first question and asks only the
   remaining ones.
-- Neither present (the plain `the `brownfield` skill` case) — step 4 runs exactly as written below: ask
+- Neither present (the plain ``/mmo:brownfield`` case) — step 4 runs exactly as written below: ask
   which job type, then run the full interview.
 
 ---
@@ -249,7 +249,7 @@ Do not propose a follow-up run.
 
 # Flag surface (headless / repeat runs)
 
-`the `pass` skill` is the flag-driven twin of every brownfield entry point for scripted / CI invocations:
+``/mmo:pass`` is the flag-driven twin of every brownfield entry point for scripted / CI invocations:
 
 ```
 --mode brownfield --intent <docs|bugfix|feature-extend|feature-new|refactor|test|deps>

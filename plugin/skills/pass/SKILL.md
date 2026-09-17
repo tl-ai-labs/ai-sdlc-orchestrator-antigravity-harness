@@ -61,7 +61,7 @@ When invoked headlessly (`plugin/agy/run.mjs`, which wraps `agy --print … --ou
 ## Brownfield-mode flags (added in v1)
 
 When `--mode=brownfield` is set, the pipeline uses the brownfield entry (equivalent to
-`the `brownfield` skill` but flag-driven for scripted / CI use). Additional required + optional
+``/mmo:brownfield`` but flag-driven for scripted / CI use). Additional required + optional
 flags:
 
 | Flag | Purpose |

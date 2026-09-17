@@ -34,7 +34,7 @@ test("run.mjs completes a two-invocation run against the stub agy and writes eve
     const driver = JSON.parse(readFileSync(join(out, "driver-manifest.json"), "utf8"));
     assert.equal(driver.agy_invocations, 2);
     assert.equal(driver.completed, true);
-    assert.equal(driver.pin.verified, false);
+    assert.equal(driver.pin.verified, true, "the headless checks passed live on 2026-09-17");
     const modeled = readFileSync(join(out, "driver-cost-modeled.jsonl"), "utf8").trim().split("\n").map(JSON.parse);
     assert.equal(modeled.length, 2);
     assert.deepEqual(modeled.map((e) => [e.input_tokens, e.input_tokens_cached, e.output_tokens]), [[600, 400, 250], [700, 800, 330]], "the second result's cumulative counters are differenced against the first");

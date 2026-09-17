@@ -112,13 +112,15 @@ test("findPinRejection reads a model rejection out of result.error and ignores u
   assert.equal(findPinRejection(parseEventStream(result("c", usage(1, 1, 0, 0)))), null);
 });
 
-test("the live pin checks are the ones the verification doc says nothing may be pinned on", () => {
-  assert.deepEqual(Object.keys(LIVE_PIN_CHECKS).map(Number), [1, 2, 4, 5, 6]);
+test("the headless pin checks are recorded as passed in the verification doc, row for row", () => {
+  assert.deepEqual(Object.keys(LIVE_PIN_CHECKS).map(Number), [2, 4, 6, 10]);
   assert.deepEqual(pendingPinChecks({ 1: "pass", 2: "pending" }), [2]);
+  assert.deepEqual(pendingPinChecks(), [], "the headless path is live-verified; run.mjs no longer needs --allow-unverified-pin");
   const doc = readFileSync(join(ROOT, "docs", "verification", "p1-agy-runtime.md"), "utf8");
-  for (const n of pendingPinChecks()) {
+  for (const [n, state] of Object.entries(LIVE_PIN_CHECKS)) {
     const row = doc.split("\n").find((l) => l.startsWith(`| ${n} |`));
-    assert.ok(row && /pending/i.test(row), `check ${n} is pending in code but not in the doc`);
+    assert.ok(row, `check ${n} has a row`);
+    if (state === "pass") assert.ok(/\*\*PASS/.test(row), `check ${n} passes in code but the doc row does not say PASS`);
   }
 });
 

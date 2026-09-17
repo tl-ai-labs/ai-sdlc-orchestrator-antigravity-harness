@@ -20,8 +20,8 @@ node "${MMO_PLUGIN_ROOT}/scripts/setup-policy.mjs" --print-only --project-root "
 This reads `.sdlc/project.json.default_policy` and prints the policy name (or an empty line if
 none is set). Also read `.sdlc/project.json.last_updated_at` and include it in the message:
 
-- If a policy is set: `Current policy: <name>   (set <last_updated_at>, change with the `policy` skill change)`.
-- If no policy is set: `No policy set yet — run the `policy` skill change to pick one, or the `setup` skill
+- If a policy is set: `Current policy: <name>   (set <last_updated_at>, change with `/mmo:policy` change)`.
+- If no policy is set: `No policy set yet — run `/mmo:policy` change to pick one, or `/mmo:setup`
   --policy=<name>.`
 
 Do not open the browser here. Do not error. This shape is purely read.
@@ -40,7 +40,7 @@ node "${MMO_PLUGIN_ROOT}/scripts/setup-policy.mjs" --guard-active-run --project-
 Parse the JSON. If `active: true`, print:
 
 ```
-A brownfield run is in progress (run_id: <run_id>, phase: <phase>). Finish it or the `revert` skill <run-id> before changing the policy.
+A brownfield run is in progress (run_id: <run_id>, phase: <phase>). Finish it or `/mmo:revert` <run-id> before changing the policy.
 ```
 
 and STOP. Do not proceed to 2b.
@@ -119,19 +119,19 @@ node "${MMO_PLUGIN_ROOT}/scripts/setup-policy.mjs" --policy=<name> --project-roo
 
 No browser. The script validates `<name>` against files in `plugin/config/policies/`, writes it to
 `.sdlc/project.json.default_policy`, and exits. Fails if `<name>` doesn't exist on disk — offer
-`the `policy` skill change` to author it, or list the shipped presets (the `.yaml` filenames under
+``/mmo:policy` change` to author it, or list the shipped presets (the `.yaml` filenames under
 `plugin/config/policies/` — read the directory rather than reciting names, so the list can
 never go stale).
 
 # Notes
 
-- The change is per-project. Once written to `.sdlc/project.json`, every subsequent `the `greenfield` skill` or
-  `the `brownfield` skill` in this folder uses the new policy. Prior runs' `provenance.json` records the
+- The change is per-project. Once written to `.sdlc/project.json`, every subsequent ``/mmo:greenfield`` or
+  ``/mmo:brownfield`` in this folder uses the new policy. Prior runs' `provenance.json` records the
   policy that was in effect at run time — those don't get rewritten.
 - To change the policy for a single ticket without touching the project's default:
-  - **Interactive** (`the `brownfield` skill`): type a different policy name at Gate 0's Policy bullet
+  - **Interactive** (``/mmo:brownfield``): type a different policy name at Gate 0's Policy bullet
     when reviewing the discovery summary. Accepted for that run only.
-  - **Headless** (`the `pass` skill`): pass `--policy <name>` on the command line. Same one-run scope.
+  - **Headless** (``/mmo:pass``): pass `--policy <name>` on the command line. Same one-run scope.
   Neither path writes to `.sdlc/project.json`.
 - The browser opens only when the user picks `Author a new policy` under `change` (or the same
-  option during first-time `the `setup` skill`). Picking a shipped preset stays in the terminal.
+  option during first-time ``/mmo:setup``). Picking a shipped preset stays in the terminal.

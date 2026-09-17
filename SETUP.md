@@ -7,7 +7,7 @@ The shepherd's manual for setup, and the reference for credentials, the two Clau
 | Where | What | Written by |
 |---|---|---|
 | `<harness>/plugin/mcp/model-dispatch/dist/` | The compiled bridge `plugin/mcp_config.json` points at | `npm run build` |
-| `<project>/.agents/plugins.json` | Registers the harness clone so agy discovers `plugin/` in this project | `tools/setup.mjs` |
+| `<project>/.agents/plugins/mmo/` | Symlinks into the clone's `plugin/`, which is how agy discovers the plugin in a trusted workspace | `tools/setup.mjs` |
 | `<project>/.sdlc/project.json` | `default_policy`, the off-limits defaults | `plugin/scripts/setup-policy.mjs` (the policy console) |
 | `<project>/.sdlc/local/mmo-select.json` | `MMO_SELECT` when the agent path is chosen | `tools/setup.mjs --agent` |
 
@@ -68,12 +68,12 @@ The conductor runs on your Google seat by default: no invoice exists, so its cos
 
 ## 7. Hand over
 
-Setup ends by telling the user to start a **new** `agy` session in the project. Plugins, rules, hooks and MCP servers load when a session begins; the setup session has none of them. Then `/` → `greenfield` or `brownfield`.
+Setup ends by telling the user to start a **new** `agy` session in the project and to answer **yes** to the trust prompt. Plugins, rules, hooks and MCP servers load when a session begins, only in a trusted workspace; the setup session has none of them. Then `/mmo:greenfield` or `/mmo:brownfield`.
 
 ## 8. Before any paid run
 
 1. `npm test` passes and `npm run verify` is green.
-2. The five live checks in [docs/verification/p1-agy-runtime.md](docs/verification/p1-agy-runtime.md) are recorded; the headless launcher refuses a paid run while they are pending.
+2. The headless checks in [docs/verification/p1-agy-runtime.md](docs/verification/p1-agy-runtime.md) (2, 4, 6, 10) pass — recorded 2026-09-17 on agy 1.2.5.
 3. `preflight_dispatch` with `auth_mode: vendor` reports `ok: true` for the policy, and its models and rates are read back to the user.
 4. The pricing blocks in the policy match `plugin/mcp/model-dispatch/src/prices.ts` (`prices.test.mjs` enforces it).
 5. An explicit go from the study owner.

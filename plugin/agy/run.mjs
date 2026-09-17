@@ -13,7 +13,8 @@
  *   --dangerously-skip-permissions print mode soft-denies every tool otherwise (6)
  *   no --sandbox                   the bridge is a piped subprocess (2)
  *   --print-timeout 6h             the default is 5 minutes; a pass runs hours
- *   cwd = repo root                .agents/plugins.json is what discovers the plugin (10)
+ *   cwd = repo root                where the .agents/plugins/mmo mount lives (10); print mode loads it
+ *                                  anyway only in name — dispatch goes through dispatch.mjs (1, 2)
  *
  * Usage:
  *   node run.mjs --brief=<path> --output-dir=<path> \

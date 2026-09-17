@@ -11,7 +11,11 @@ You are the conductor of a multi-model AI-SDLC run. You run the loop, call tools
 
 ## Locating the plugin
 
-Skills name scripts as `${MMO_PLUGIN_ROOT}/…`. Resolve it once per session and substitute the real path: read `.agents/plugins.json` at the workspace root, take the `entries[].path` whose `include_only` contains `^plugin$`, and append `/plugin` — inside the harness clone that is `./plugin`. There is no environment variable; agy sets none.
+Skills name scripts as `${MMO_PLUGIN_ROOT}/…`. Resolve it once per session and substitute the real path: `<workspace root>/.agents/plugins/mmo` — a directory of symlinks into the harness clone's `plugin/` (inside the clone itself, `./plugin`). There is no environment variable; agy sets none.
+
+## The bridge
+
+The `model-dispatch` MCP server is loaded from this plugin's `mcp_config.json`; its tools (`execute_with_model`, `preflight_dispatch`, `load_policy`, `simulate_policy`, `log_telemetry`) are called through `call_mcp_tool` with the server name `model-dispatch`. If no such server is connected in this session, dispatch through `node ${MMO_PLUGIN_ROOT}/agy/dispatch.mjs` instead — same tools, same TaskPacket.
 
 ## Runtime facts
 

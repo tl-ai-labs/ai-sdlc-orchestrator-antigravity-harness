@@ -24,7 +24,7 @@ pause only when a human decision is genuinely required.
 
 This is the RE-VERIFY / RE-CONFIGURE command. First-time install (marketplace add + `/plugin
 install`) still lives in [SETUP.md](../../SETUP.md) — the plugin has to exist before its slash
-commands do. `the `setup` skill` covers everything from step 3 of SETUP.md onward: MCP server build,
+commands do. ``/mmo:setup`` covers everything from step 3 of SETUP.md onward: MCP server build,
 environment check, credential probe, Gemini door, policy pick, and the hand-over banner.
 
 Every step below auto-runs unless it hits a genuine decision. Print one line per completed step,
@@ -102,7 +102,7 @@ If `--policy=<name>` was supplied, honor it silently — no prompt, no browser:
 node "${MMO_PLUGIN_ROOT}/scripts/setup-policy.mjs" --policy=<name> --project-root "$(pwd)"
 ```
 
-**Otherwise, use the same terminal picker as `the `policy` skill change` Shape 2.** Skip the mid-run
+**Otherwise, use the same terminal picker as ``/mmo:policy` change` Shape 2.** Skip the mid-run
 guard here (no brownfield run has started yet in setup); everything else applies:
 
 1. Enumerate policies:
@@ -139,12 +139,12 @@ did not (e.g. the run stopped short earlier), print it explicitly:
 
 Try one of these in a NEW session in the same folder:
 
-  the `greenfield` skill          — generate a new app from a brief (empty folder)
-  the `brownfield` skill   — work on this existing repo (docs, bugfix, feature, refactor, …)
-  the `policy` skill       — change this project's model policy
-  the `pass` skill         — headless/scripted run (for CI or replays)
+  `/mmo:greenfield`          — generate a new app from a brief (empty folder)
+  `/mmo:brownfield`   — work on this existing repo (docs, bugfix, feature, refactor, …)
+  `/mmo:policy`       — change this project's model policy
+  `/mmo:pass`         — headless/scripted run (for CI or replays)
 
-Current policy: <policyName>   (change: the `policy` skill change)
+Current policy: <policyName>   (change: `/mmo:policy` change)
 ```
 
 Say plainly why a NEW session is required: agy loads a plugin's skills, rules, hooks and MCP
@@ -158,5 +158,5 @@ Every step is safe to re-run:
 - The Gemini-door flip is a plain write of `.sdlc/local/mmo-select.json`.
 - The policy pick reads `.sdlc/project.json` first and skips the browser if a policy is already set.
 
-Re-run `the `setup` skill` after `/plugin update` (the update wipes `dist/`; `--fix` restores it), or
+Re-run ``/mmo:setup`` after `/plugin update` (the update wipes `dist/`; `--fix` restores it), or
 whenever a credential changes.

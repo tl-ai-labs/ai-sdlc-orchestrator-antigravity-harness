@@ -6,10 +6,10 @@
  * harness with the project you will run in, and picks that project's policy.
  *
  * What is agy-specific here: agy discovers a plugin from the WORKSPACE it is
- * opened in — `<project>/.agents/plugins.json` — never from a global install
- * (docs/verification/p1-agy-runtime.md check 10). So the one step the Claude
- * and Codex harnesses do not have is writing that file into the project,
- * pointing at this clone by absolute path. Nothing under ~/.gemini is touched.
+ * opened in — `<project>/.agents/plugins/<name>/` — never from a global
+ * install (docs/verification/p1-agy-runtime.md check 10). So the one step
+ * the Claude and Codex harnesses do not have is mounting that directory in
+ * the project as symlinks into this clone. Nothing under ~/.gemini is touched.
  *
  * Shares its checks with plugin/agy/verify-setup.mjs by import — one copy.
  *
@@ -22,7 +22,7 @@
  */
 
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readFileSync, readlinkSync, rmSync, symlinkSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -52,41 +52,42 @@ export function parseArgs(argv) {
   return args;
 }
 
+/** What a project's `.agents/plugins/mmo/` mount links to in the clone. */
+export const MOUNT_FILES = ["plugin.json", "mcp_config.json", "hooks.json"];
+export const MOUNT_DIRS = ["agents", "agy", "config", "examples", "mcp", "policy-console", "rules", "scripts", "skills", "templates"];
+
 /**
- * The registration a project needs so that opening `agy` in it discovers this
- * harness's plugin. Absolute path: `.agents/plugins.json` resolves bare paths
- * against the project's own repo root, which is not where the clone is.
- * Inside the harness clone itself the committed file (`path: "."`) already
- * does this, so it is left alone.
+ * The mount a project needs so that opening `agy` in it discovers this
+ * harness's plugin: `<project>/.agents/plugins/mmo/` whose entries are
+ * symlinks into the clone's plugin/ (docs/verification/p1-agy-runtime.md
+ * check 10 — the declared `.agents/plugins.json` route did not resolve on
+ * agy 1.2.5; a plugin directory under `.agents/plugins/` did). Absolute
+ * targets: the clone is not inside the project. Inside the clone itself the
+ * committed mount uses relative links and is left alone.
  */
-export function registrationFor(projectRoot, harnessRoot = ROOT) {
+export function mountPlan(projectRoot, harnessRoot = ROOT) {
   const inside = resolve(projectRoot) === resolve(harnessRoot);
-  return { entries: [{ path: inside ? "." : resolve(harnessRoot), include_only: ["^plugin$"] }] };
+  const mount = join(resolve(projectRoot), ".agents", "plugins", "mmo");
+  const pluginRoot = join(resolve(harnessRoot), "plugin");
+  const target = (name) => (inside ? join("..", "..", "..", "plugin", name) : join(pluginRoot, name));
+  return { mount, inside, links: [...MOUNT_FILES, ...MOUNT_DIRS].map((name) => ({ name, target: target(name) })) };
 }
 
-/** Merge this harness into an existing plugins.json without dropping other entries. */
-export function mergeRegistration(existing, registration) {
-  const wanted = registration.entries[0];
-  const entries = Array.isArray(existing?.entries) ? existing.entries.slice() : [];
-  const already = entries.some((e) => e?.path === wanted.path && (e.include_only ?? []).includes("^plugin$"));
-  if (!already) entries.push(wanted);
-  return { ...(existing && typeof existing === "object" ? existing : {}), entries };
-}
-
-export function registerProject(projectRoot, harnessRoot = ROOT, io = { existsSync, readFileSync, writeFileSync, mkdirSync }) {
-  const path = join(projectRoot, ".agents", "plugins.json");
-  const registration = registrationFor(projectRoot, harnessRoot);
-  let existing = null;
-  if (io.existsSync(path)) {
-    try { existing = JSON.parse(io.readFileSync(path, "utf8")); } catch { existing = null; }
+export function registerProject(projectRoot, harnessRoot = ROOT, io = { existsSync, readFileSync, mkdirSync, symlinkSync, readlinkSync, rmSync, lstatSync }) {
+  const plan = mountPlan(projectRoot, harnessRoot);
+  if (plan.inside) return { path: plan.mount, changed: false, plan };
+  let changed = false;
+  io.mkdirSync(plan.mount, { recursive: true });
+  for (const { name, target } of plan.links) {
+    const at = join(plan.mount, name);
+    let current = null;
+    try { current = io.lstatSync(at).isSymbolicLink() ? io.readlinkSync(at) : "<not a symlink>"; } catch { current = null; }
+    if (current === target) continue;
+    if (current !== null) io.rmSync(at, { recursive: true, force: true });
+    io.symlinkSync(target, at);
+    changed = true;
   }
-  const merged = mergeRegistration(existing, registration);
-  const changed = JSON.stringify(merged) !== JSON.stringify(existing);
-  if (changed) {
-    io.mkdirSync(dirname(path), { recursive: true });
-    io.writeFileSync(path, JSON.stringify(merged, null, 2) + "\n");
-  }
-  return { path, changed, registration: merged };
+  return { path: plan.mount, changed, plan };
 }
 
 const c = { dim: "\x1b[2m", bold: "\x1b[1m", green: "\x1b[32m", amber: "\x1b[33m", red: "\x1b[31m", reset: "\x1b[0m" };
@@ -207,14 +208,14 @@ async function main(args) {
     } else warn("Skipped — mechanical packets on the agent path would fail until it exists.");
   }
 
-  step("Register the plugin with this project");
+  step("Mount the plugin in this project");
   const discovery = pluginDiscoveryState(PLUGIN_ROOT);
   if (!discovery.ok) { fail(`The harness clone is incomplete: ${discovery.problems.join("; ")}`); blocked = true; }
   const reg = registerProject(projectRoot);
-  const relPath = relative(process.cwd(), reg.path);
-  const rel = !relPath || relPath.startsWith("..") ? reg.path : relPath;
-  if (reg.changed) ok(`Wrote ${rel} → agy opened in this project discovers the mmo plugin from the clone.`);
-  else ok(`${rel} already registers the plugin.`);
+  if (reg.plan.inside) ok("This is the harness clone; its committed .agents/plugins/mmo/ mount already applies.");
+  else if (reg.changed) ok(`Linked ${reg.path} → plugin/ in the clone. agy opened in this project discovers the mmo plugin.`);
+  else ok(`${reg.path} already mounts the plugin.`);
+  hint("agy asks once whether you trust the folder; answer yes, or nothing under .agents/ loads (the trust entry must match the path's spelling).");
   hint("Nothing under ~/.gemini is edited. Do not run `agy plugin install` on this repo.");
 
   step("This project's default policy");
@@ -241,7 +242,7 @@ async function main(args) {
     console.log(`${c.dim}Re-check without the questions: npm run verify${c.reset}`);
   } else {
     console.log(`${c.bold}Setup complete.${c.reset} Start a NEW agy session in ${projectRoot} — plugins and MCP servers load when a session begins — then:`);
-    console.log(`  type / and pick greenfield (empty folder + brief) or brownfield (existing repo)`);
+    console.log(`  /mmo:greenfield   (empty folder + brief)      /mmo:brownfield   (existing repo)`);
     console.log(`\nHeadless instead:\n  node "${join(ROOT, "plugin", "agy", "run.mjs")}" --brief=./brief.md --project-root="${projectRoot}" --output-dir="${projectRoot}/.sdlc" --dry-run`);
     console.log(`${c.dim}Re-check any time: npm run verify${c.reset}`);
   }

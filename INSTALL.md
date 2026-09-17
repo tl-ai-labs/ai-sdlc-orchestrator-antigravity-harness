@@ -26,7 +26,7 @@ If `../ai-sdlc-orchestrator-antigravity-harness` already exists, `git -C ../ai-s
 node ../ai-sdlc-orchestrator-antigravity-harness/tools/setup.mjs --project-root "$(pwd)"
 ```
 
-It checks Node, `agy`, `claude` and credentials; builds `plugin/mcp/model-dispatch/dist/` (`npm ci && npm run build`, gitignored, rebuilt after every pull that touches the bridge); asks about the Gemini agent path only when Vertex ADC exists; writes `<project>/.agents/plugins.json` pointing at the clone; and opens the policy console once to pick `.sdlc/project.json` → `default_policy`. Pass `--yes` to take every default, `--policy=<name>` to skip the browser, `--no-agent` to skip the door question.
+It checks Node, `agy`, `claude` and credentials; builds `plugin/mcp/model-dispatch/dist/` (`npm ci && npm run build`, gitignored, rebuilt after every pull that touches the bridge); asks about the Gemini agent path only when Vertex ADC exists; mounts the plugin as `<project>/.agents/plugins/mmo/` (symlinks into the clone); and opens the policy console once to pick `.sdlc/project.json` → `default_policy`. Pass `--yes` to take every default, `--policy=<name>` to skip the browser, `--no-agent` to skip the door question.
 
 Report the wizard's output to the user as it stands. An item marked ✗ names what is missing and where to set it; do not work around it.
 
@@ -43,19 +43,22 @@ Never write a key into a file in either repo. [SETUP.md](SETUP.md) covers the ar
 
 ## 5. What discovery looks like
 
-`<project>/.agents/plugins.json`:
+`<project>/.agents/plugins/mmo/` — a directory whose entries are symlinks into the clone:
 
-```json
-{ "entries": [{ "path": "/abs/path/to/ai-sdlc-orchestrator-antigravity-harness", "include_only": ["^plugin$"] }] }
+```
+plugin.json -> /abs/path/to/ai-sdlc-orchestrator-antigravity-harness/plugin/plugin.json
+mcp_config.json, hooks.json, skills/, rules/, mcp/, agy/, config/, scripts/, … likewise
 ```
 
-agy resolves `entries[].path` and loads `plugin/` as a plugin named `mmo`: its `plugin.json`, `mcp_config.json`, `hooks.json`, `rules/AGENTS.md` and `skills/*`. Inside the harness clone itself the committed `.agents/plugins.json` (`path: "."`) does the same.
+agy scans `.agents/plugins/` in a **trusted** workspace and loads `mmo`: its `plugin.json`, `mcp_config.json`, `hooks.json`, `rules/AGENTS.md` and `skills/*` (as `mmo:<name>`). Inside the harness clone itself the committed mount uses relative links. The declared route (`.agents/plugins.json`) did not resolve on agy 1.2.5 and is not used ([docs/verification/p1-agy-runtime.md](docs/verification/p1-agy-runtime.md), check 10).
+
+Two things that silently leave the plugin unloaded: an **untrusted** workspace (agy asks on first open; the stored path must match the folder's spelling exactly), and **print mode** — `agy -p` loads no workspace customization at all, which is why headless runs go through `plugin/agy/run.mjs` and its dispatch script rather than the MCP server.
 
 Do not run `agy plugin install` or `agy plugin import` on this repo: both copy the plugin into `~/.gemini/config/plugins/`, and the standing rules keep everything in the repo.
 
 ## 6. Hand over
 
-Tell the user to start a **new** `agy` session in the project — plugins, rules, hooks and MCP servers load when a session begins — and then type `/` and pick `greenfield` (empty folder + brief) or `brownfield` (existing repo). In that session `/plugins` lists `mmo`, `/mcp` shows `model-dispatch` connected, `/skills` lists the entry points.
+Tell the user to start a **new** `agy` session in the project — plugins, rules, hooks and MCP servers load when a session begins — answer **yes** to the trust prompt, and then run `/mmo:greenfield` (empty folder + brief) or `/mmo:brownfield` (existing repo). In that session `/skills` lists the `mmo:` entry points.
 
 ## 7. Verify later
 

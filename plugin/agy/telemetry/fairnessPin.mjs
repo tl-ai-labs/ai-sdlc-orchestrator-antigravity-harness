@@ -14,17 +14,18 @@ export const EFFORTS = new Set(["low", "medium", "high"]);
 export const BILLING_MODES = new Set(["seat", "gemini-api-key"]);
 
 /**
- * Live checks the pin depends on (p1-agy-runtime.md, "Pins chosen"). While
- * any is pending, run.mjs refuses a paid run unless told to record the pin as
- * unverified. Flip an entry to "pass" only with the check's result written
- * into the doc in the same commit.
+ * Live checks the headless pin depends on (p1-agy-runtime.md, "Pins chosen").
+ * Recorded 2026-09-17 on agy 1.2.5. Print mode loads no workspace
+ * customization (no plugin, no MCP server, no hooks), so a headless run
+ * dispatches through plugin/agy/dispatch.mjs (pattern b) and checks 1 and 5
+ * (the MCP route, ${VAR} in mcp_config.json) are interactive-only — they do
+ * not gate a headless run. Flip an entry only with the result in the doc.
  */
 export const LIVE_PIN_CHECKS = {
-  1: "pending", // bridge tools callable from an agy session (pattern a) + tool prefix
-  2: "pending", // bridge subprocess survives without --sandbox
-  4: "pending", // --print reaches the prompt / imported skill
-  5: "pending", // ${VAR} interpolation in mcp_config.json
-  6: "pending", // --dangerously-skip-permissions makes a headless run possible
+  2: "pass", // dispatch.mjs reaches the bridge from a print-mode session, with and without --sandbox
+  4: "pass", // print mode expands no skill; the conductor prompt is the headless entry. Interactive name: /mmo:<skill>
+  6: "pass", // without --dangerously-skip-permissions run_command is auto-denied, stderr names the allow-rule
+  10: "pass", // .agents/plugins/mmo/ is discovered in an interactive session (skills as mmo:*, hooks loaded); .agents/plugins.json was not
 };
 
 export function pendingPinChecks(checks = LIVE_PIN_CHECKS) {
