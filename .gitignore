@@ -32,3 +32,6 @@ Thumbs.db
 
 # A stray clone of this repo nested in the working tree; never part of the harness
 /ai-sdlc-orchestrator-antigravity-harness/
+
+# Clones agy makes of the workspace inside itself during an interactive session (seen 2026-09-17 as ./Untitled/)
+/Untitled/

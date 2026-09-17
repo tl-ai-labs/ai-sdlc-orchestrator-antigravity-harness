@@ -51,7 +51,7 @@ writing the content yourself — a phase that silently becomes your own prose is
 failure this architecture exists to prevent.
 
 (In an interactive `agy` session the plugin does load and the bridge's tools are callable
-through `call_mcp_tool`; that route is not available here.)
+through `call_mcp_tool` on the server `mmo_model-dispatch`; that route is not available here.)
 
 ## Rule 0 — preflight, before anything else
 

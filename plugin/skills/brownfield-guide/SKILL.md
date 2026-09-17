@@ -77,7 +77,7 @@ Agent-side steps (1 = discovery smoke, 3 = dispatch smoke) — you run yourself:
    "smoke", instruction: "Return the literal string OK", ... }` TaskPacket, write it to a file,
    and dispatch it to each policy tier the current policy uses (premium + mechanical for
    `antigravity-flash38-plus-opus5`; the same two tiers for `antigravity-flash38-plus-haiku45`) —
-   through `call_mcp_tool` → `model-dispatch` / `execute_with_model` when the bridge is connected
+   through `call_mcp_tool` → `mmo_model-dispatch` / `execute_with_model` when the bridge is connected
    to this session, otherwise:
    ```bash
    node "${MMO_PLUGIN_ROOT}/agy/dispatch.mjs" --packet=<smoke-packet.json> \

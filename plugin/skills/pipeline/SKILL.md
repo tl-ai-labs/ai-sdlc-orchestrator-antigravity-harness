@@ -58,10 +58,12 @@ Keep the quotes around paths: they can contain spaces, and an unquoted one split
 arguments. The script speaks MCP to the same bridge an interactive session calls directly.
 
 **Interactive (`agy` in the workspace, plugin loaded).** The bridge's tools are reachable through
-`call_mcp_tool` with the server name `model-dispatch`: `execute_with_model` (the packet, plus
+`call_mcp_tool` with the server name `mmo_model-dispatch` (agy prefixes a plugin's server with the
+plugin name; the bare `model-dispatch` is refused): `execute_with_model` (the packet, plus
 `policy_name`, `project_root` and `telemetry_path`), `preflight_dispatch`, `load_policy`,
 `simulate_policy` and `log_telemetry`. Same tools, same TaskPacket, same result shape. If no
-`model-dispatch` server is connected in the session, fall back to the command above.
+`mmo_model-dispatch` server is connected in the session, or `call_mcp_tool` is not in your
+toolset, fall back to the command above.
 
 The rest of this playbook says "dispatch a packet" and shows the command form; read it as either
 route. Every phase's real work goes through one of them — a phase that silently becomes your own

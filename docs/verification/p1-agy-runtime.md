@@ -26,7 +26,7 @@ hooks, skills, rules, JSON configs); then `strings` over the binary; then `antig
 
 | # | Check | Result | Confirms |
 |---|---|---|---|
-| 1 | Can the model in an agy session call the bridge's tools (pattern a), and what is the tool prefix | **SPLIT — 2026-09-17, agy 1.2.5.** Print mode (`agy -p`) loads **no** workspace customization: no plugin, no MCP server, no hook, no skill (`loaded 0 named hooks`, `empty component: prompt section "mcp_servers"`, the model reports no MCP tools) — so on the headless path the answer is *no*, and `run.mjs` uses the dispatch fallback (check 2). Interactive: the plugin loads (check 10) and MCP tools are reached through the generic `call_mcp_tool` tool, not per-tool bindings; whether `model-dispatch` starts and answers interactively is **pending** a one-line interactive test (prompt in "How to run the pending checks") | Driver-layer pattern (a) vs (b): **(b) headless, (a) interactive** |
+| 1 | Can the model in an agy session call the bridge's tools (pattern a), and what is the tool prefix | **SPLIT — 2026-09-17, agy 1.2.5.** Print mode (`agy -p`) loads **no** workspace customization: no plugin, no MCP server, no hook, no skill (`loaded 0 named hooks`, `empty component: prompt section "mcp_servers"`, the model reports no MCP tools) — so on the headless path the answer is *no*, and `run.mjs` uses the dispatch fallback (check 2). Interactive: the plugin loads (check 10) and MCP tools are reached through the generic `call_mcp_tool` tool, not per-tool bindings; **the bridge does start and connect interactively** — agy wrote its tool cache to `~/.gemini/antigravity-cli/mcp/mmo_model-dispatch/{execute_with_model,preflight_dispatch,load_policy,simulate_policy,log_telemetry}.json` during two `agy -i` sessions on 2026-09-17, so the server name is the namespaced **`mmo_model-dispatch`** (changelog 1.2.2 `<plugin>_<server>`); a subagent asking for the bare `model-dispatch` was refused *"server model-dispatch is not allowed in this context"*. What is still **pending** is a call that returns: in both `-i` sessions the main agent's toolset had no `call_mcp_tool` and no MCP tools at the moment the prompt was sent (the model listed its 15 built-in tools), while the tool cache was written seconds later — so either the server connects after the first turn's toolset is fixed, or MCP tools are only reachable from a subagent with `enable_mcp_tools`. Settle it with the pause-first prompt in "How to run the pending checks" | Driver-layer pattern (a) vs (b): **(b) headless, (a) interactive** |
 | 2 | Does the bridge subprocess survive without `--sandbox` | **PASS — 2026-09-17, agy 1.2.5.** `dispatch.mjs --preflight` run by the model's `run_command` from a print-mode session reached the bridge and wrote the preflight result, both with the default (no `--sandbox`) **and with `--sandbox`**: agy's terminal sandbox does not kill a piped child, unlike Codex's. `run.mjs` still passes no `--sandbox` | Bridge connectivity on the headless path |
 | 3 | Are imported agents' `tools:` lists ignored or rejected | **MOOT — 2026-09-17.** agy's plugin format has no agents component (`plugins.md`: skills, rules, hooks, MCP), and `agy plugin validate` on the mount reports `agents: skipped (not found)`. The role prompts therefore port as content, the Codex way: `plugin/skills/pipeline/roles/{architect,senior-reviewer,security-reviewer}.md` are the `instruction` body of their phase's bridge dispatch, and `plugin/skills/brownfield-guide/discovery.md` is the conductor's own local read. `plugin/agents/` is gone; no frontmatter `tools:` list reaches agy | Role prompts port as content |
 | 4 | Does `--print "/pass …"` reach the imported skill, and under what slash name | **PASS — 2026-09-17, agy 1.2.5.** Interactive `/skills` lists the plugin's skills as `mmo:<name>` — `/mmo:greenfield`, `/mmo:brownfield`, `/mmo:pass`, `/mmo:policy` … — so the Claude harness's vocabulary is the live one. Print mode expands **no** workspace skill (`agy -p "/mmo:policy"` made the model search the web for the phrase), so the headless entry is the conductor prompt `run.mjs` renders, never a slash command | Skill invocation form |
@@ -57,7 +57,7 @@ hooks, skills, rules, JSON configs); then `strings` over the binary; then `antig
 8. **Print mode is plugin-less.** `agy -p` loads no workspace customization — no plugin, MCP server, hook or skill. Every measured run therefore dispatches through `plugin/agy/dispatch.mjs` (pattern b), and the write-contract hook does not fire on a headless run (greenfield needs none; a headless brownfield run has no guard — say so in its record).
 9. **Trust is a hard gate, and it compares strings.** An untrusted workspace, or one trusted under a differently-cased path, loads nothing and says nothing.
 10. **`.agents/plugins.json` did not resolve; `.agents/plugins/<name>/` did.** The repo mounts the plugin that way.
-11. **Interactive MCP tools go through `call_mcp_tool`.** There is no per-tool binding; the conductor rules name the server and tool.
+11. **Interactive MCP tools go through `call_mcp_tool`, on the namespaced server `mmo_model-dispatch`.** There is no per-tool binding; the conductor rules name the server and tool. Whether the main agent or only a subagent holds `call_mcp_tool` is the open half of check 1.
 12. **The sandbox does not kill the bridge.** Codex's finding does not carry over.
 
 ## Pins chosen
@@ -71,14 +71,23 @@ billing, in the policy's `driver:` block.
 ## How to run the pending checks
 
 Checks 1 and 5 (interactive MCP route) need an **interactive** `agy` session in the repo root — print
-mode loads no plugin. $0: `load_policy` and `preflight_dispatch` make no vendor call. Type at agy's
-`>` prompt:
+mode loads no plugin, and `agy -i "<prompt>"` sends the prompt before the bridge has connected (both
+2026-09-17 attempts). $0: `load_policy` and `preflight_dispatch` make no vendor call.
+
+1. In a shell with `GEMINI_API_KEY=probe-value-123` exported, start a plain `agy` in the repo root.
+2. **Wait ~30 seconds** at the `>` prompt (the bridge is a Node process agy spawns; its tools join
+   the toolset once it answers `tools/list`), then paste:
 
 ```
-Using call_mcp_tool, call the tool load_policy on the MCP server model-dispatch with {"policy_name":"antigravity-flash38-plus-haiku45"} and print the policy name and model ids. Then call preflight_dispatch with {"auth_mode":"vendor","policy_name":"antigravity-flash38-plus-haiku45"} and print the full result. Do not run any shell command.
+Using the call_mcp_tool tool, call load_policy on the MCP server named mmo_model-dispatch with {"policy_name":"antigravity-flash38-plus-haiku45"} and print the policy name and the model ids it returned. Then call preflight_dispatch on the same server with {"auth_mode":"vendor","policy_name":"antigravity-flash38-plus-haiku45"} and print its full JSON result verbatim. If call_mcp_tool is not in your toolset, list every tool you have whose name contains mcp, mmo or dispatch. Do not run any shell command, do not read files, do not create subagents.
 ```
 
-Pass for check 1: both calls return (record the server/tool names as the model reports them).
+3. If the main agent still reports no `call_mcp_tool`, ask it once more to do the same through a
+   subagent it defines with MCP tools enabled for `mmo_model-dispatch` — that tells us whether the
+   interactive route is main-agent or subagent-only.
+
+Pass for check 1: both calls return; record which route answered and the exact server/tool names.
 Pass for check 5: the preflight result shows the Gemini door configured (the shell's `GEMINI_API_KEY`
 reached the server through `mcp_config.json`); a missing-credential verdict with the key exported
 in the shell means `${VAR}` did not expand, and interactive use needs the key set another way.
+Neither check gates a headless run.

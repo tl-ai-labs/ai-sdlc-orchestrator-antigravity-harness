@@ -31,7 +31,7 @@ plugin/agy/manifest.mjs builds manifest.json from telemetry.jsonl + the driver f
 
 ## Two dispatch routes
 
-**(a) MCP route — interactive.** In a trusted workspace agy loads the plugin's `mcp_config.json`, starts the bridge, and exposes its tools through the generic `call_mcp_tool` (no per-tool binding). The rules name the server and tools.
+**(a) MCP route — interactive.** In a trusted workspace agy loads the plugin's `mcp_config.json`, starts the bridge, and exposes its tools under the namespaced server `mmo_model-dispatch` through the generic `call_mcp_tool` (no per-tool binding). The rules name the server and tools.
 
 **(b) Dispatch script — headless.** `agy -p` loads no plugin at all (check 1), so the conductor prompt `run.mjs` renders tells the model to run `node plugin/agy/dispatch.mjs --packet=… --out=…`, which spawns the same server as a stdio subprocess through `plugin/mcp/model-dispatch/src/driverClient.ts` and speaks MCP to it. Same tools, same TaskPacket contract; only who opens the socket differs. agy's sandbox does not kill it (check 2).
 

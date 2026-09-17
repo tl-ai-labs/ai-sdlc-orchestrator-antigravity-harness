@@ -15,7 +15,7 @@ Skills name scripts as `${MMO_PLUGIN_ROOT}/…`. Resolve it once per session and
 
 ## The bridge
 
-The `model-dispatch` MCP server is loaded from this plugin's `mcp_config.json`; its tools (`execute_with_model`, `preflight_dispatch`, `load_policy`, `simulate_policy`, `log_telemetry`) are called through `call_mcp_tool` with the server name `model-dispatch`. If no such server is connected in this session, dispatch through `node ${MMO_PLUGIN_ROOT}/agy/dispatch.mjs` instead — same tools, same TaskPacket.
+The `model-dispatch` MCP server is loaded from this plugin's `mcp_config.json`. agy namespaces a plugin's server as `<plugin>_<server>`, so in a session it is **`mmo_model-dispatch`** — the bare name `model-dispatch` is refused ("not allowed in this context"). Its tools (`execute_with_model`, `preflight_dispatch`, `load_policy`, `simulate_policy`, `log_telemetry`) are called through `call_mcp_tool` with that server name. If `call_mcp_tool` is not in your toolset, or no `mmo_model-dispatch` server is connected, dispatch through `node ${MMO_PLUGIN_ROOT}/agy/dispatch.mjs` instead — same tools, same TaskPacket.
 
 ## Runtime facts
 
