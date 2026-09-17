@@ -156,3 +156,22 @@ test("tools/report.mjs reads the same run directory and keeps the modeled line a
     assert.match(r.stdout, /modeled/i);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test("on the seat the Claude line is modeled, leaves the cash figure, and the cable names the seat", () => {
+  const dir = runDir();
+  try {
+    const login = { loggedIn: true, method: "claude.ai", subscription: "max" };
+    const m = buildHarnessManifest({ runDir: dir, env: { GEMINI_API_KEY: "g" }, login });
+    const byLine = Object.fromEntries(m.cost.lines.map((l) => [l.line, l]));
+    assert.equal(byLine.claude_worker.kind, "modeled");
+    assert.equal(byLine.claude_worker.wallet, "claude-seat");
+    assert.match(byLine.claude_worker.basis, /^MODELED/);
+    assert.equal(m.cost.claude_seat_modeled_usd, 0.05);
+    assert.equal(m.cost.dispatched_cash_usd, 0.003125, "only the Gemini calls are cash on the seat");
+    assert.equal(m.harness.arm, "seat");
+    assert.equal(m.harness.provider_source.claude, "claude-seat");
+    assert.match(m.harness.cable.claude_worker_auth, /claude\.ai max seat/);
+    assert.equal(claudeWallet({}, login).arm, "seat");
+    assert.equal(claudeWallet({ ANTHROPIC_API_KEY: "k" }, login).arm, "A");
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});

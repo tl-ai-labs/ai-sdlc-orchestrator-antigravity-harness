@@ -408,7 +408,8 @@ async function main(args) {
     // manifest.json is written by code, never by the model. Failing here must
     // not lose the run: the driver files above are enough to rebuild it later.
     try {
-      const full = buildHarnessManifest({ runDir: outputDir, policyName, runId, version: manifest.agy_version });
+      const { probeClaudeLogin } = await import("./verify-setup.mjs");
+      const full = buildHarnessManifest({ runDir: outputDir, policyName, runId, version: manifest.agy_version, login: probeClaudeLogin() });
       writeFileSync(join(outputDir, "manifest.json"), JSON.stringify(full, null, 2) + "\n", "utf-8");
     } catch (err) {
       console.error(`run: manifest.json not written (${err?.message ?? err}); rebuild with node plugin/agy/manifest.mjs '${outputDir}'`);

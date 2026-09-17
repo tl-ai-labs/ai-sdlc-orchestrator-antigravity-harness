@@ -45,9 +45,11 @@ function readJson(path) {
 const r6 = (n) => Math.round(n * 1e6) / 1e6;
 
 /** Which Claude wallet the bridge env selected, from the environment the run was launched with. */
-export function claudeWallet(env = process.env) {
+export function claudeWallet(env = process.env, login = null) {
   if (env.CLAUDE_CODE_USE_VERTEX === "1") return { arm: "B", wallet: "gcp", provider_source: "vertex", project: env.ANTHROPIC_VERTEX_PROJECT_ID ?? null, region: env.CLOUD_ML_REGION ?? null };
   if (env.ANTHROPIC_API_KEY) return { arm: "A", wallet: "anthropic", provider_source: "anthropic-api", project: null, region: null };
+  // The seat: Claude Code signed in to claude.ai. No invoice — the line is modeled.
+  if (login?.loggedIn && login.method === "claude.ai") return { arm: "seat", wallet: "claude-seat", provider_source: "claude-seat", project: null, region: null, subscription: login.subscription ?? null };
   return { arm: null, wallet: null, provider_source: null, project: null, region: null };
 }
 
@@ -59,7 +61,7 @@ export function geminiDoor(policy, env = process.env) {
 }
 
 /** The three lines. `dispatched` are bridge events (no orchestrator tier). */
-export function costLines({ dispatched, modeled, policy, pin, env = process.env }) {
+export function costLines({ dispatched, modeled, policy, pin, env = process.env, login = null }) {
   const claudeModels = new Set((policy?.models ?? []).filter((m) => m.adapter === "claude-cli").map((m) => m.model_name));
   const sum = (events) => ({
     cost_usd: r6(events.reduce((s, e) => s + (e.cost_usd ?? 0), 0)),
@@ -71,8 +73,9 @@ export function costLines({ dispatched, modeled, policy, pin, env = process.env 
   const billed = dispatched.filter((e) => e.model && e.provenance !== "none");
   const claude = billed.filter((e) => claudeModels.has(e.model));
   const gemini = billed.filter((e) => !claudeModels.has(e.model));
-  const wallet = claudeWallet(env);
+  const wallet = claudeWallet(env, login);
   const door = geminiDoor(policy, env);
+  const seat = wallet.arm === "seat";
   return [
     {
       line: "driver",
@@ -84,8 +87,9 @@ export function costLines({ dispatched, modeled, policy, pin, env = process.env 
       thinking_tokens: modeled.reduce((s, e) => s + (e.output_tokens_reasoning ?? 0), 0),
     },
     { line: "gemini_workers", kind: "cash", wallet: door.wallet, leaf: door.leaf, models: [...new Set(gemini.map((e) => e.model))], ...sum(gemini) },
-    { line: "claude_worker", kind: "cash", wallet: wallet.wallet, arm: wallet.arm, models: [...new Set(claude.map((e) => e.model))], ...sum(claude),
-      cli_reported_cost_usd: r6(claude.reduce((s, e) => s + (e.cli_reported_cost_usd ?? 0), 0)) },
+    { line: "claude_worker", kind: seat ? "modeled" : "cash", wallet: wallet.wallet, arm: wallet.arm, models: [...new Set(claude.map((e) => e.model))], ...sum(claude),
+      cli_reported_cost_usd: r6(claude.reduce((s, e) => s + (e.cli_reported_cost_usd ?? 0), 0)),
+      ...(seat ? { basis: `MODELED: claude -p ran on a claude.ai ${wallet.subscription ?? ""} seat — tokens priced at the Anthropic card, no invoice exists` } : {}) },
   ];
 }
 
@@ -94,7 +98,7 @@ export function agyVersion(run = spawnSync) {
   return r?.status === 0 ? String(r.stdout).trim() : null;
 }
 
-export function buildHarnessManifest({ runDir, policyName, runId, env = process.env, version = null, now = () => new Date().toISOString() }) {
+export function buildHarnessManifest({ runDir, policyName, runId, env = process.env, version = null, login = null, now = () => new Date().toISOString() }) {
   const telemetry = readJsonl(join(runDir, "telemetry.jsonl"));
   const modeled = readJsonl(join(runDir, "driver-cost-modeled.jsonl"));
   const driverManifest = readJson(join(runDir, "driver-manifest.json"));
@@ -116,9 +120,10 @@ export function buildHarnessManifest({ runDir, policyName, runId, env = process.
 
   let pin = null;
   try { pin = policy ? readPin(policy) : null; } catch { pin = null; }
-  const lines = costLines({ dispatched, modeled, policy, pin, env });
+  const lines = costLines({ dispatched, modeled, policy, pin, env, login });
   const driverLine = lines[0];
-  const wallet = claudeWallet(env);
+  const claudeLine = lines[2];
+  const wallet = claudeWallet(env, login);
   const workerModels = [...new Set(dispatched.map((e) => e.model))];
 
   const harness = {
@@ -139,7 +144,7 @@ export function buildHarnessManifest({ runDir, policyName, runId, env = process.
       driver_models: pin ? [pin.model] : [],
       driver_auth: pin?.billing_mode === "gemini-api-key" ? "GEMINI_API_KEY (metered)" : "Google seat (sign-in) — no per-token invoice",
       worker_models: workerModels,
-      claude_worker_auth: wallet.arm === "B" ? `Vertex on GCP project ${wallet.project ?? "?"} (${wallet.region ?? "?"})` : wallet.arm === "A" ? "Anthropic API key" : null,
+      claude_worker_auth: wallet.arm === "B" ? `Vertex on GCP project ${wallet.project ?? "?"} (${wallet.region ?? "?"})` : wallet.arm === "A" ? "Anthropic API key" : wallet.arm === "seat" ? `claude.ai ${wallet.subscription ?? ""} seat (OAuth) — not the metered API`.replace("  ", " ") : null,
       summary: `${RUNTIME_NAME} driver → model-dispatch bridge (Opus 5 via claude -p, Gemini via ${geminiDoor(policy, env).leaf ?? "?"})`,
     },
     driver_cost_usd: driverLine.cost_usd,
@@ -168,11 +173,14 @@ export function buildHarnessManifest({ runDir, policyName, runId, env = process.
       provenance: "modeled",
     },
   };
+  // On the seat the Claude line is modeled too, so it leaves the cash figure.
+  const seat = claudeLine.kind === "modeled";
   const cost = {
-    dispatched_cash_usd: base.total_cost_usd,
+    dispatched_cash_usd: seat ? r6(base.total_cost_usd - claudeLine.cost_usd) : base.total_cost_usd,
     driver_modeled_usd: driverLine.cost_usd,
+    ...(seat ? { claude_seat_modeled_usd: claudeLine.cost_usd } : {}),
     lines,
-    note: "dispatched_cash_usd and driver_modeled_usd are different kinds of dollars and are not summed.",
+    note: "dispatched_cash_usd and the modeled figures are different kinds of dollars and are not summed.",
   };
 
   return { ...base, harness, usage, cost };
@@ -198,7 +206,8 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     process.exit(2);
   }
   try {
-    const manifest = buildHarnessManifest({ runDir, policyName: args.policy, runId: args["run-id"], version: args["agy-version"] ?? agyVersion() });
+    const { probeClaudeLogin } = await import("./verify-setup.mjs");
+    const manifest = buildHarnessManifest({ runDir, policyName: args.policy, runId: args["run-id"], version: args["agy-version"] ?? agyVersion(), login: probeClaudeLogin() });
     const out = join(runDir, "manifest.json");
     writeFileSync(out, JSON.stringify(manifest, null, 2) + "\n", "utf8");
     console.log(`manifest: wrote ${out} — dispatched cash $${manifest.cost.dispatched_cash_usd}, driver modeled $${manifest.cost.driver_modeled_usd}`);

@@ -31,7 +31,7 @@ import { stdin as input, stdout as output } from "node:process";
 
 import {
   buildWorkerEnvironment, workerPaths, vertexCredentialState, inspectCredentialFile, probeAgyCli, probeClaudeCli,
-  meetsMinVersion, mcpPaths, MIN_AGY_VERSION, AGENT_WORKER_SELECT, observePolicy, claudeArmState, pluginDiscoveryState,
+  meetsMinVersion, mcpPaths, MIN_AGY_VERSION, AGENT_WORKER_SELECT, observePolicy, claudeArmState, pluginDiscoveryState, probeClaudeLogin,
 } from "../plugin/agy/verify-setup.mjs";
 import { writeMmoSelectFile } from "../plugin/agy/mmoSelect.mjs";
 
@@ -147,15 +147,16 @@ async function main(args) {
   const env = process.env;
   const policy = observePolicy(PLUGIN_ROOT, projectRoot);
   const policyLabel = policy.selected ? `policy '${policy.name}'` : `default policy '${policy.name}'`;
-  const arm = claudeArmState(env);
+  const arm = claudeArmState(env, claude.present ? probeClaudeLogin() : null);
   if (arm.arm === "A") ok("Arm A: ANTHROPIC_API_KEY is set — Opus 5 bills the Anthropic key.");
+  else if (arm.arm === "seat") { warn(`Seat: ${arm.detail} — Opus 5 runs with no key and no invoice; its cost line is modeled.`); hint("Fine for wiring and development runs. A study cost of record needs arm A or B, or the owner's sign-off on a seat-billed line."); }
   else if (arm.arm === "B" && !arm.missing?.length) ok(`Arm B: Vertex — Opus 5 bills GCP project ${env.ANTHROPIC_VERTEX_PROJECT_ID} (${env.CLOUD_ML_REGION}).`);
   else if (arm.arm === "B") { fail(`Arm B is incomplete: ${arm.detail}.`); blocked = true; }
   else if (arm.arm === "both") { fail(`Both Claude arms are set (${arm.detail}). Unset one.`); blocked = true; }
   else if (policy.usesClaudeCli === false) ok(`No Claude wallet, and the ${policyLabel} does not need one.`);
   else {
     fail(`No Claude wallet, and the ${policyLabel} bills one.`);
-    hint("Arm A: export ANTHROPIC_API_KEY=…   Arm B: CLAUDE_CODE_USE_VERTEX=1 ANTHROPIC_VERTEX_PROJECT_ID=… CLOUD_ML_REGION=global");
+    hint("Arm A: export ANTHROPIC_API_KEY=…   Arm B: CLAUDE_CODE_USE_VERTEX=1 ANTHROPIC_VERTEX_PROJECT_ID=… CLOUD_ML_REGION=global   Seat: sign in once with `claude`");
     blocked = true;
   }
   const vertex = vertexCredentialState({

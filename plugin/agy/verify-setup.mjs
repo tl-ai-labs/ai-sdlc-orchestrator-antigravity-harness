@@ -307,6 +307,24 @@ export function probeClaudeCli(run = spawnSync) {
   return { present: true, version: parseVersionTriple(result.stdout) };
 }
 
+/**
+ * Claude Code's own sign-in state, from `claude auth status` (JSON on 2.1.x).
+ * A claude.ai subscription is the third Claude wallet — the seat: `claude -p`
+ * runs on it with no key, and no invoice exists, so the Opus line is modeled.
+ * Never reads ~/.claude; parses only the command's own output.
+ */
+export function probeClaudeLogin(run = spawnSync) {
+  const result = run("claude", ["auth", "status"], { encoding: "utf8", timeout: 10_000 });
+  if (result.error || result.status !== 0) return { loggedIn: false, method: null, subscription: null };
+  try {
+    const j = JSON.parse(String(result.stdout));
+    return { loggedIn: j.loggedIn === true, method: j.authMethod ?? null, subscription: j.subscriptionType ?? null };
+  } catch {
+    const out = String(result.stdout ?? "");
+    return { loggedIn: /logged ?in/i.test(out) && !/not logged/i.test(out), method: null, subscription: null };
+  }
+}
+
 export const DEFAULT_POLICY = "antigravity-flash38-plus-opus5";
 
 export function policyAdapters(yamlText) {
@@ -342,7 +360,7 @@ export function observePolicy(pluginRoot, projectRoot = process.cwd(), read = re
  * misconfiguration: `claude -p` would bill Vertex while the key sits unused,
  * and the run record could not say which arm ran.
  */
-export function claudeArmState(env = {}) {
+export function claudeArmState(env = {}, login = null) {
   const real = usableEnv(env);
   const key = Boolean(real.ANTHROPIC_API_KEY);
   const vertex = real.CLAUDE_CODE_USE_VERTEX === "1";
@@ -351,6 +369,11 @@ export function claudeArmState(env = {}) {
   if (vertex) {
     const missing = ["ANTHROPIC_VERTEX_PROJECT_ID", "CLOUD_ML_REGION"].filter((k) => !real[k]);
     return { arm: "B", detail: missing.length ? `CLAUDE_CODE_USE_VERTEX=1 without ${missing.join(", ")}` : "Vertex", missing };
+  }
+  // The seat: Claude Code signed in to claude.ai. `claude -p` bills nothing per token; the
+  // Opus line is modeled. Not the plan's arm A or B — a study on it needs the owner's say-so.
+  if (login?.loggedIn && login.method === "claude.ai") {
+    return { arm: "seat", detail: `Claude Code signed in to claude.ai${login.subscription ? ` (${login.subscription})` : ""}` };
   }
   return { arm: "none", detail: null };
 }
@@ -383,6 +406,7 @@ export function evaluate({
   nodeMajor,
   agyCli = { present: false, version: null },
   claudeCli = { present: false, version: null },
+  claudeLogin = null,
   hasNodeModules,
   hasDist,
   discovery = { ok: true, problems: [] },
@@ -462,7 +486,7 @@ export function evaluate({
     });
   }
 
-  const arm = claudeArmState(env);
+  const arm = claudeArmState(env, claudeLogin);
   if (policy?.usesClaudeCli !== false) {
     if (claudeCli.unprovable) {
       problems.push({
@@ -479,12 +503,19 @@ export function evaluate({
         fix: "Install Claude Code (https://code.claude.com/docs) and sign in or export ANTHROPIC_API_KEY.",
       });
     }
-    if (arm.arm === "none") {
+    if (arm.arm === "seat") {
+      problems.push({
+        id: "claude-seat",
+        severity: "warning",
+        message: `The Opus worker will run on your Claude subscription (${arm.detail}) — no key, no invoice, so its cost line is modeled, not the study's arm A or B.`,
+        fix: "Fine for wiring and development runs. For a study cost of record, export ANTHROPIC_API_KEY (arm A) or the Vertex variables (arm B), or get the study owner's sign-off on a seat-billed Opus line.",
+      });
+    } else if (arm.arm === "none") {
       problems.push({
         id: "claude-arm",
         severity: policy?.usesClaudeCli ? "blocking" : "warning",
-        message: "No Claude wallet is selected: neither ANTHROPIC_API_KEY (arm A) nor CLAUDE_CODE_USE_VERTEX=1 (arm B) is set.",
-        fix: `Export one arm's variables in ${ENV_ADVICE}. See SETUP.md.`,
+        message: "No Claude wallet is selected: no ANTHROPIC_API_KEY (arm A), no CLAUDE_CODE_USE_VERTEX=1 (arm B), and Claude Code is not signed in to claude.ai (seat).",
+        fix: `Export one arm's variables in ${ENV_ADVICE}, or sign in once with \`claude\`. See SETUP.md.`,
       });
     } else if (arm.arm === "both") {
       problems.push({
@@ -582,6 +613,7 @@ function observe(pluginRoot, env = process.env, projectRoot = process.cwd()) {
     nodeMajor: nodeMajorFrom(process.versions.node),
     agyCli: probeAgyCli(),
     claudeCli: probeClaudeCli(),
+    claudeLogin: probeClaudeLogin(),
     hasGcloud: onPath("gcloud"),
     hasNodeModules: existsSync(nodeModules),
     hasDist: existsSync(distEntry),

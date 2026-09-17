@@ -10,7 +10,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
-  evaluate, claudeArmState, pluginDiscoveryState, probeAgyCli, probeClaudeCli, parseVersionTriple, meetsMinVersion,
+  evaluate, claudeArmState, pluginDiscoveryState, probeAgyCli, probeClaudeCli, probeClaudeLogin, parseVersionTriple, meetsMinVersion,
   MIN_AGY_VERSION, observePolicy, policyAdapters, DECLARED_ENV, isUnexpandedPlaceholder, usableEnv, unexpandedDeclaredEnv,
   parseSelectSpec, selectSpecProblem, selectsAgentWorker, enableAgentPath, DEFAULT_POLICY, nextStepsBanner,
 } from "../../plugin/agy/verify-setup.mjs";
@@ -176,4 +176,31 @@ test("runChecks on this machine reports a schema and never throws", () => {
   const report = runChecks();
   assert.equal(report.schema_version, 1);
   assert.equal(report.checks.length, 4);
+});
+
+// ── the seat: Claude Code signed in to claude.ai ─────────────────────────
+
+test("probeClaudeLogin parses `claude auth status` JSON and treats a failed spawn as signed out", () => {
+  const json = JSON.stringify({ loggedIn: true, authMethod: "claude.ai", subscriptionType: "max", email: "x@y" });
+  assert.deepEqual(probeClaudeLogin(() => ({ status: 0, stdout: json })), { loggedIn: true, method: "claude.ai", subscription: "max" });
+  assert.equal(probeClaudeLogin(() => ({ error: { code: "ENOENT" } })).loggedIn, false);
+  assert.equal(probeClaudeLogin(() => ({ status: 0, stdout: JSON.stringify({ loggedIn: false }) })).loggedIn, false);
+});
+
+test("a claude.ai sign-in with no key is the seat; a key or Vertex still wins over it", () => {
+  const login = { loggedIn: true, method: "claude.ai", subscription: "max" };
+  assert.equal(claudeArmState({}, login).arm, "seat");
+  assert.match(claudeArmState({}, login).detail, /max/);
+  assert.equal(claudeArmState({ ANTHROPIC_API_KEY: "k" }, login).arm, "A");
+  assert.equal(claudeArmState({ CLAUDE_CODE_USE_VERTEX: "1", ANTHROPIC_VERTEX_PROJECT_ID: "p", CLOUD_ML_REGION: "global" }, login).arm, "B");
+  assert.equal(claudeArmState({}, { loggedIn: true, method: "console" }).arm, "none", "an API-console login is not a seat");
+});
+
+test("on the seat, evaluate passes with a warning that the Opus line is modeled", () => {
+  const state = evaluate({ ...HEALTHY, env: { GEMINI_API_KEY: "g" }, claudeLogin: { loggedIn: true, method: "claude.ai", subscription: "max" } });
+  assert.equal(state.ok, true);
+  const p = state.problems.find((p) => p.id === "claude-seat");
+  assert.equal(p.severity, "warning");
+  assert.match(p.message, /modeled/);
+  assert.ok(!state.problems.some((p) => p.id === "claude-arm"));
 });
