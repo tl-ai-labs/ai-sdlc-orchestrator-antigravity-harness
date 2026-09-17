@@ -40,8 +40,11 @@ test("a policy customized from the study preset keeps the driver block and the c
   assert.ok(Object.keys(reparsed).indexOf("driver") < Object.keys(reparsed).indexOf("models"), "driver: is written above models:, as the shipped file has it");
 });
 
-test("a policy customized from a carried preset with no driver block gets none invented", () => {
-  const custom = customizedFrom("opus-plus-flash");
+test("a policy customized from a base with no driver block gets none invented", () => {
+  const base = load("antigravity-flash38-plus-opus5");
+  delete base.driver;
+  const summary = summarizePolicy("driverless", base, "");
+  const custom = buildCustomPolicy(baseFor(base), { name: "my-custom", models: summary.models, routing: summary.routing, thinking: summary.thinking, intentOverrides: summary.intentOverrides });
   assert.ok(!("driver" in custom));
   assert.throws(() => readPin(custom), /no top-level driver: block/);
 });
@@ -52,7 +55,8 @@ test("the summary exposes the driver pin and the cap for the page to show", () =
   assert.equal(s.driver.model_name, "gemini-3.8-flash");
   assert.equal(s.driver.reasoning.effort, "high");
   assert.equal(s.hardCostCapUsd, 5);
-  assert.equal(summarizePolicy("opus-plus-flash", load("opus-plus-flash"), "").driver, null);
+  const driverless = load("antigravity-flash38-plus-opus5"); delete driverless.driver;
+  assert.equal(summarizePolicy("driverless", driverless, "").driver, null);
 });
 
 test("the antigravity presets are presets, and the claude-cli label names the two arms", () => {

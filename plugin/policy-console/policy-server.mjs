@@ -90,14 +90,6 @@ const ANTHROPIC_EFFORT_TIERS = ["off", "low", "medium", "high", "xhigh", "max"];
 const SHIPPED_PRESETS = [
   "antigravity-flash38-plus-haiku45",
   "antigravity-flash38-plus-opus5",
-  "flash-agsdk-only",
-  "opus-only",
-  "opus-only-v5",
-  "opus-plus-flash",
-  "opus-plus-flash-v37",
-  "opus-plus-flash-v38",
-  "opus-plus-sonnet",
-  "opus-plus-sonnet-max",
 ];
 const NAME_PATTERN = /^[a-z0-9][a-z0-9-]*$/;
 
@@ -226,7 +218,7 @@ function fallbackRule(policy) {
 
 /**
  * Rules for phases NOT in the visible PHASES list (e.g. brownfield's
- * `discovery`, `change_plan` in `opus-plus-flash.yaml`). The console UI
+ * `discovery`, `change_plan` in `antigravity-flash38-plus-opus5.yaml`). The console UI
  * only renders 9 phases, but the base policy may name more. Without this,
  * buildCustomPolicy iterates only PHASES and silently drops those rules
  * on save — a data-loss regression from the old TypeScript app. Skip the
@@ -333,7 +325,7 @@ export function buildCustomPolicy(base, input) {
   }
 
   // Carry through rules for phases the console UI doesn't edit — brownfield's
-  // discovery / change_plan in opus-plus-flash.yaml is the concrete case. Old
+  // discovery / change_plan in antigravity-flash38-plus-opus5.yaml is the concrete case. Old
   // code silently dropped these on save; a saved custom policy would then fall
   // through to the default for those phases.
   if (Array.isArray(structural.extraPhaseRules)) {

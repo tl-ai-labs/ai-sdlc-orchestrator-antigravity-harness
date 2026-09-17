@@ -65,7 +65,7 @@ block that differs from the dated price list. The server bills the list, not the
 numbers stay right; the fix belongs in the policy file, not in this run.
 
 **`not_selected` is not a warning and not a problem.** A policy may hold more than one way of reaching a
-tier — `opus-plus-flash` reaches its mechanical tier either as a Gemini model call or as an Antigravity
+tier — `antigravity-flash38-plus-opus5` reaches its mechanical tier either as a Gemini model call or as an Antigravity
 agent — and only the one this install selected can be dispatched to. The other is listed here, unchecked,
 because its prerequisites are irrelevant to a run that will never call it. Do not report it as a failure,
 do not try to "fix" it, and do not offer to install anything on its behalf.
@@ -80,7 +80,7 @@ unusable credential throws. It makes no model call and costs nothing. It exists 
 construction used to happen lazily at the first mechanical packet — phase 4 of 9, after the premium
 phases were already billed — which is the worst possible moment to discover a setup problem.
 
-**Escalation to the direct tier under `estimated` stays in-session.** `opus-plus-flash` escalates a
+**Escalation to the direct tier under `estimated` stays in-session.** `antigravity-flash38-plus-opus5` escalates a
 `debug` packet to the premium model after two mechanical-tier retries (`retry_count: { gte: 2 }`). In
 `estimated` mode that escalated packet is yours to handle in your own conversation, with char-count
 estimation and `provenance: "estimated"`, exactly like every other direct-tier phase — do not dispatch
@@ -343,7 +343,7 @@ non-terminal state and re-prompts on next `the `brownfield` skill` invocation. N
 > - **Stack:** `<top-detected stacks>` — correct? add/override?
 > - **Test command:** `<detected>` — enter to accept, or paste the command.
 > - **Policy:** `<the default_policy field setup wrote to .sdlc/project.json>` — accept, or
->   name another on-disk policy for this run only (e.g. `opus-only`). To change the project's
+>   name another on-disk policy for this run only (e.g. `antigravity-flash38-plus-haiku45`). To change the project's
 >   persistent default, re-run setup (`node "${MMO_PLUGIN_ROOT}/scripts/setup-policy.mjs"`
 >   — this is the one command that opens a browser; every other setup step is terminal-only).
 > - **Existing AI setup:** `<verbatim list from Tier 1 group 6>` — is any of this

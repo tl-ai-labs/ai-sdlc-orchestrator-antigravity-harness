@@ -22,7 +22,7 @@ The conductor authors no shipped content. Every requirements document, design, p
 | `plugin/skills/<name>/SKILL.md` | The 13 entry points (`greenfield`, `pass`, `brownfield`, …) plus `pipeline` and `brownfield-guide` |
 | `plugin/agents/*.md` | The five role prompts, carried as content: each becomes the system prompt of a bridge dispatch |
 | `plugin/mcp/model-dispatch/` | The bridge: routing policy → adapter → model, with its own telemetry ledger. `dist/` is gitignored; build it |
-| `plugin/config/policies/` | Routing policies. `antigravity-flash38-plus-opus5.yaml` is the study policy; `antigravity-flash38-plus-haiku45.yaml` proves the wiring for cents |
+| `plugin/config/policies/` | The two routing policies this harness ships: `antigravity-flash38-plus-opus5.yaml` (Gemini 3.8 Flash conducts, Opus 5 judges, Flash executes — the study policy) and `antigravity-flash38-plus-haiku45.yaml` (same routing, Haiku 4.5 as judge — proves the wiring for cents). The Claude harness's other presets are bridge test fixtures only |
 | `plugin/agy/run.mjs` | The headless driver: builds the pinned `agy --print` invocation, captures stream-json, writes the driver's modeled cost and manifest |
 | `plugin/agy/prompts/conductor.md` | The conductor prompt: state machine, TaskPacket contract, gates, the MCP route and the dispatch fallback |
 | `plugin/agy/telemetry/` | `fairnessPin.mjs` reads the pin off the policy's `driver:` block; `event-reader.mjs` prices stream-json `usage` as a labeled modeled line |

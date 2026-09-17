@@ -13,7 +13,7 @@ pause only when a human decision is genuinely required.
 **Argument parsing:**
 - `--policy=<name>` — pre-answer the policy pick (skips the browser). Must match a file in
   `plugin/config/policies/<name>.yaml` — the directory listing is the authoritative preset set
-  (`opus-plus-flash` is the recommended default; a wrong name makes the loader print the live
+  (`antigravity-flash38-plus-opus5` is the study policy and the default; a wrong name makes the loader print the live
   list).
 - `--gemini-door=<enterprise|antigravity>` — pre-answer the Gemini door choice. `enterprise` is the
   API-key / ADC path (default); `antigravity` opens the Antigravity SDK worker (requires ADC).

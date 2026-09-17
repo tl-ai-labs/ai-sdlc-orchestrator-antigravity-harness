@@ -303,9 +303,9 @@ function renderGallery() {
     `;
     g.appendChild(c);
   }
-  // Default the "add new" base to opus-plus-flash if present, otherwise the
+  // Default the "add new" base to the study policy if present, otherwise the
   // first shipped preset, otherwise the first policy on disk.
-  const defaultBase = allPolicies.find((p) => p.id === "opus-plus-flash")
+  const defaultBase = allPolicies.find((p) => p.id === "antigravity-flash38-plus-opus5")
     ?? allPolicies.find((p) => p.origin === "preset")
     ?? allPolicies[0];
   if (defaultBase) {

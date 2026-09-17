@@ -41,7 +41,7 @@ for:
    file whenever it exists. Omitting `project_root` is the historical bug: the run silently fell
    back to the shipped preset while the project's own policy sat unread.
 3. **Otherwise the named preset** `plugin/config/policies/<name>.yaml` loads — the project's
-   `default_policy` from `.sdlc/project.json`, or `opus-plus-flash` when none is set.
+   `default_policy` from `.sdlc/project.json`, or `antigravity-flash38-plus-opus5` when none is set.
 
 Pass the same policy arguments on **every** call, `simulate_policy` included — a what-if priced
 under a different policy than the run used is worse than no what-if.

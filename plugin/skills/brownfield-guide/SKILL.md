@@ -76,7 +76,7 @@ Agent-side steps (1 = discovery smoke, 3 = dispatch smoke) — you run yourself:
 3. **Dispatch smoke.** Construct a trivial `{ id: "smoke-1", phase: "codegen", task_type:
    "smoke", instruction: "Return the literal string OK", ... }` TaskPacket and dispatch via
    `execute_with_model` to each policy tier the current policy uses (typically premium +
-   mechanical for `opus-plus-flash`; just premium for `opus-only`). If both return their expected
+   mechanical for `antigravity-flash38-plus-opus5`; the same two tiers for `antigravity-flash38-plus-haiku45`). If both return their expected
    output within the timeout, record pass:
    ```bash
    echo '{"tiers_tested":["opus","gemini-flash"]}' | node "${MMO_PLUGIN_ROOT}/scripts/pre-check.mjs" --record dispatch pass
@@ -179,7 +179,7 @@ template from [plugin/skills/pipeline/SKILL.md](/plugin/skills/pipeline/SKILL.md
   run setup first (see [SETUP.md](/SETUP.md) §5 — the one setup step that opens a browser
   for the policy console). Do not silently default and do not launch the console from here.
   Otherwise show the resolved name; accept, or accept an on-disk policy name for this run only
-  (e.g. `opus-only`) — a per-run override does not overwrite the project default.
+  (e.g. `antigravity-flash38-plus-haiku45`) — a per-run override does not overwrite the project default.
 - **Existing AI setup** — verbatim list from `baseline.ai_configs_detected`. Default is
   **OFF-LIMITS** for all of them. User can move any into the allowlist by naming it explicitly.
 - **Intent** — from step 4a. Re-confirm, even when the handover pre-set it.

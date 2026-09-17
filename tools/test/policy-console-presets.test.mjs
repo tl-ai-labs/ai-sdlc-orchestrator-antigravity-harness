@@ -8,7 +8,7 @@
  * as "custom" (five presets once did, when the list named two), and a name
  * left on the list after its file is removed would label a user's own policy
  * of that name "preset". Nothing else fails in either case, so this pins it:
- * adding opus-plus-flash-v38 in v0.7.3 without the list entry fails here.
+ * adding a preset without the list entry fails here.
  *
  * Offline, reads repo files only. It parses the array out of the source text
  * instead of importing policy-server.mjs, which starts an HTTP server.

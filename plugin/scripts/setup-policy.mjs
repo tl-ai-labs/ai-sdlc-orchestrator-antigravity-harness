@@ -496,7 +496,7 @@ async function interactiveFlow(resolved, args) {
   process.stderr.write("\n");
   process.stderr.write(`  → Configure your policy in the browser, then click Save.\n`);
   process.stderr.write(`  → The terminal detects your save automatically (no Enter needed).\n`);
-  process.stderr.write(`  → To skip (pipelines will fall back to opus-plus-flash), press Ctrl-C.\n\n`);
+  process.stderr.write(`  → To skip (pipelines will fall back to antigravity-flash38-plus-opus5), press Ctrl-C.\n\n`);
 
   // Wait for a save (or Enter in a real TTY, or timeout). fs.watch is the
   // primary path because Claude Code's Bash tool doesn't provide interactive
@@ -508,7 +508,7 @@ async function interactiveFlow(resolved, args) {
 
   const { added, modified } = diffPolicies(before);
   // Strip the .yaml extension — `default_policy` in project.json is a policy
-  // *name* (`opus-only`, `opus-plus-flash`), not a filename. Downstream
+  // *name* (`antigravity-flash38-plus-opus5`, `antigravity-flash38-plus-haiku45`), not a filename. Downstream
   // consumers (session-hydrate, MCP policy loader, /mmo:policy print) all
   // treat it as the bare stem; the old single-candidate branch left the
   // extension on, producing `default_policy="foo.yaml"` and 404s downstream.
@@ -532,7 +532,7 @@ async function interactiveFlow(resolved, args) {
       "\nType a policy name to use as this project's default, or press Enter to skip: ",
     );
     if (!ans) {
-      log("skipped — no default_policy written; pipelines will use opus-plus-flash.");
+      log("skipped — no default_policy written; pipelines will use antigravity-flash38-plus-opus5.");
       cleanup();
       return;
     }

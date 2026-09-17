@@ -58,7 +58,7 @@ The console (`plugin/policy-console/`, opened by `plugin/scripts/setup-policy.mj
 |---|---|
 | `antigravity-flash38-plus-opus5` | The study policy. Gemini 3.8 Flash conducts; Opus 5 at high effort on judgment phases; Flash on mechanical. Cap $50 |
 | `antigravity-flash38-plus-haiku45` | Identical routing with Haiku 4.5 as the judgment worker. Proves the wiring for cents. Cap $5 |
-| the carried `opus-*` / `flash-*` presets | The Claude harness's policies; they have no `driver:` block and cannot be run by `plugin/agy/run.mjs` |
+| (nothing else) | The Claude harness's `opus-*` / `flash-*` presets are not shipped here; they live under `plugin/mcp/model-dispatch/test/fixtures/policies/` as routing-engine test fixtures. This harness runs Gemini 3.8 Flash and Claude Opus 5 (Haiku 4.5 only as the wiring proof) |
 
 Scripted: `node tools/setup.mjs --policy=<name>`, or `node plugin/scripts/setup-policy.mjs --policy=<name> --project-root <project>`.
 

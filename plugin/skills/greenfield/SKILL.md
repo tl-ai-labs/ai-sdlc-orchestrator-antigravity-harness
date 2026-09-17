@@ -154,7 +154,7 @@ and every billed dispatch resolve through the same loader. Keep passing it on ea
 `execute_with_model` anyway — the fallback is a safety net, not a licence to drop the argument.
 
 The plan preview must state which policy file won and where it came from — one line, e.g.
-`Policy: project override (routing-policy.yaml)` or `Policy: preset opus-plus-flash` — so a
+`Policy: project override (routing-policy.yaml)` or `Policy: preset antigravity-flash38-plus-opus5` — so a
 surprise override is visible before anything is billed. To tell the two apart, check whether
 `<project root>/routing-policy.yaml` exists: if it does, the loader used it.
 
@@ -194,9 +194,9 @@ the console from this flow; setup owns it.
 
 If step 1 reported missing Gemini credentials, say so here and explain the consequence in one
 sentence: the mechanical phases cannot dispatch, so the run would fail at the first codegen packet.
-Offer to continue on `opus-only` instead, which routes every phase to Claude and needs no Gemini
-credentials — and say plainly that it costs more, because the cost saving comes precisely from the
-phases that would have gone to the cheaper model.
+There is no all-Claude preset on this harness — the conductor itself is Gemini, so a Gemini
+credential is required regardless. Stop and tell the user which door to open (`GEMINI_API_KEY`,
+or Vertex ADC), then re-run the setup skill.
 
 # 5. Confirm the telemetry mode
 
@@ -218,7 +218,7 @@ Invoke the `orchestrator` subagent with the resolved settings from the steps abo
 
 - `brief_path` — the confirmed brief
 - `auth_mode` — `vendor` or `estimated`, as confirmed in step 5
-- `policy` — the resolved policy name from step 4 (`project.default_policy` or `opus-plus-flash`)
+- `policy` — the resolved policy name from step 4 (`project.default_policy` or `antigravity-flash38-plus-opus5`)
 - `code_dir` — `./src`
 - `output_dir` — `./.sdlc`
 
