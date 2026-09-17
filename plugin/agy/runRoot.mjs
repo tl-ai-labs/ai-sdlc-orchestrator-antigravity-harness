@@ -13,7 +13,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-export const LINKED_PLUGIN_DIRS = ["agents", "agy", "config", "examples", "mcp", "policy-console", "rules", "scripts", "skills", "templates"];
+export const LINKED_PLUGIN_DIRS = ["agy", "config", "examples", "mcp", "policy-console", "rules", "scripts", "skills", "templates"];
 
 export function defaultRunRoot(runId, base = tmpdir()) {
   return join(base, `mmo-agy-run-${String(runId).replace(/[^A-Za-z0-9_.-]/g, "_")}`);

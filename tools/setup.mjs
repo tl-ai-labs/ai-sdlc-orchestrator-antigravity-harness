@@ -54,7 +54,7 @@ export function parseArgs(argv) {
 
 /** What a project's `.agents/plugins/mmo/` mount links to in the clone. */
 export const MOUNT_FILES = ["plugin.json", "mcp_config.json", "hooks.json"];
-export const MOUNT_DIRS = ["agents", "agy", "config", "examples", "mcp", "policy-console", "rules", "scripts", "skills", "templates"];
+export const MOUNT_DIRS = ["agy", "config", "examples", "mcp", "policy-console", "rules", "scripts", "skills", "templates"];
 
 /**
  * The mount a project needs so that opening `agy` in it discovers this

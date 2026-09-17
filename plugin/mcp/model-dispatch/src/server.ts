@@ -64,7 +64,7 @@ function validateTaskPacket(raw: unknown): TaskPacket {
     });
     throw new Error(
       `execute_with_model: TaskPacket is missing required field${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}. ` +
-      `See plugin/mcp/model-dispatch/src/types.ts for the schema (or plugin/agents/orchestrator.md for the required-fields table).`,
+      `See plugin/mcp/model-dispatch/src/types.ts for the schema (or the TaskPacket table in plugin/skills/pipeline/SKILL.md).`,
     );
   }
   if (!Array.isArray(packet.inputs)) {

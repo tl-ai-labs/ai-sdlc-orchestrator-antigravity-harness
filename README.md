@@ -12,7 +12,7 @@ The conductor authors no shipped content. Every requirements document, design, p
 
 ## Status
 
-**P4 — records and parity.** The plugin, bridge, policies, prompts, the headless driver (`plugin/agy/`) and the code-written `manifest.json` are in place; the offline test suite passes and `run.mjs --dry-run` prints the pinned invocation. The pin's live checks in [docs/verification/p1-agy-runtime.md](docs/verification/p1-agy-runtime.md) (1, 2, 4, 5, 6) are still pending a signed-in `agy` session, so `run.mjs` refuses a paid run unless told to stamp the pin as unverified. No measured run has been made.
+**P4 — records and parity.** The plugin, bridge, policies, prompts, the headless driver (`plugin/agy/`) and the code-written `manifest.json` are in place; the offline test suite passes and `run.mjs --dry-run` prints the pinned invocation. The headless pin's live checks in [docs/verification/p1-agy-runtime.md](docs/verification/p1-agy-runtime.md) (2, 4, 6, 10) passed on agy 1.2.5, so `run.mjs` runs without `--allow-unverified-pin`; checks 1 and 5 concern the interactive MCP route only. No measured run has been made.
 
 ## Layout
 
@@ -20,7 +20,7 @@ The conductor authors no shipped content. Every requirements document, design, p
 |---|---|
 | `plugin/plugin.json`, `plugin/mcp_config.json`, `plugin/rules/AGENTS.md` | The agy plugin manifest, its bridge registration, and the conductor rules |
 | `plugin/skills/<name>/SKILL.md` | The 13 entry points (`greenfield`, `pass`, `brownfield`, …) plus `pipeline` and `brownfield-guide` |
-| `plugin/agents/*.md` | The five role prompts, carried as content: each becomes the system prompt of a bridge dispatch |
+| `plugin/skills/pipeline/roles/*.md`, `plugin/skills/brownfield-guide/discovery.md` | The role prompts, carried as content: architect, senior reviewer and security reviewer are the `instruction` body of their phase's bridge dispatch; discovery is the conductor's own local read |
 | `plugin/mcp/model-dispatch/` | The bridge: routing policy → adapter → model, with its own telemetry ledger. `dist/` is gitignored; build it |
 | `plugin/config/policies/` | The two routing policies this harness ships: `antigravity-flash38-plus-opus5.yaml` (Gemini 3.8 Flash conducts, Opus 5 judges, Flash executes — the study policy) and `antigravity-flash38-plus-haiku45.yaml` (same routing, Haiku 4.5 as judge — proves the wiring for cents). The Claude harness's other presets are bridge test fixtures only |
 | `plugin/agy/run.mjs` | The headless driver: builds the pinned `agy --print` invocation, captures stream-json, writes the driver's modeled cost and manifest |
