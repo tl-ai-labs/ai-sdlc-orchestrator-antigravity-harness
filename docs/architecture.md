@@ -1,6 +1,8 @@
 # Architecture
 
-The Codex shape: a cheap conductor runs the loop, every model call goes through the bridge, the harness around the conductor writes the records.
+> **For:** understanding how a request flows through the harness — conductor, bridge, dispatch routes, hooks, records — and finding any file. **Also see:** [running.md](running.md) · [methodology.md](methodology.md) · [repo-overview.md](repo-overview.md).
+
+The conductor shape: a cheap conductor runs the loop, every model call goes through the bridge, the harness around the conductor writes the records.
 
 ```
 node plugin/agy/run.mjs
@@ -65,3 +67,34 @@ agy has five hook events (`hooks.md`): `PreToolUse`, `PostToolUse`, `PreInvocati
 | `SessionStart`, `UserPromptSubmit` | Session hydration, prompt-time checks | `PreInvocation` (fires before every model call; use `injectSteps` with an `ephemeralMessage`) |
 
 Hook commands run with cwd = the directory containing `hooks.json` (the plugin dir), so `plugin/hooks.json` names scripts relative to it and no `${CLAUDE_PLUGIN_ROOT}` exists.
+
+## File inventory
+
+| Path | What |
+|---|---|
+| `plugin/plugin.json`, `plugin/mcp_config.json`, `plugin/rules/AGENTS.md` | The agy plugin manifest, its bridge registration, and the conductor rules |
+| `plugin/skills/<name>/SKILL.md` | The 13 entry points (`greenfield`, `pass`, `brownfield`, the seven job aliases, `setup`, `policy`, `revert`) plus the two playbooks `pipeline` and `brownfield-guide` |
+| `plugin/skills/pipeline/roles/*.md`, `plugin/skills/brownfield-guide/discovery.md` | The role prompts, carried as content: architect, senior reviewer and security reviewer are the `instruction` body of their phase's bridge dispatch; discovery is the conductor's own local read |
+| `plugin/mcp/model-dispatch/` | The bridge: routing policy → adapter → model, with its own telemetry ledger. `dist/` is gitignored; `npm run build` produces it |
+| `plugin/mcp/model-dispatch/src/prices.ts` | The dated price cards every policy's pricing block must match (`prices.test.mjs` enforces it) |
+| `plugin/mcp/model-dispatch/worker/gemini_worker.py` | The Antigravity SDK agent worker — the only Python file, installed only on machines that chose the agent path |
+| `plugin/config/policies/` | The two routing policies this harness ships: `antigravity-flash38-plus-opus5.yaml` (the study policy) and `antigravity-flash38-plus-haiku45.yaml` (same routing, Haiku 4.5 as judge — proves the wiring for cents). The Claude harness's other presets are bridge test fixtures only |
+| `plugin/agy/run.mjs` | The headless driver: builds the pinned `agy --print` invocation, captures stream-json, runs the resume loop, writes the driver's modeled cost and the manifest |
+| `plugin/agy/prompts/conductor.md` | The conductor prompt: state machine, TaskPacket contract, gates, the MCP route and the dispatch fallback |
+| `plugin/agy/telemetry/` | `fairnessPin.mjs` reads the pin off the policy's `driver:` block; `event-reader.mjs` prices stream-json `usage` as a labeled modeled line |
+| `plugin/agy/dispatch.mjs` | Pattern (b): the conductor shells out to this when its session binds no bridge tool; it speaks MCP via `mcp/model-dispatch/src/driverClient.ts` |
+| `plugin/agy/hooks/`, `plugin/hooks.json` | The write-contract PreToolUse guard and the bridge-call heartbeat, in agy's hook format |
+| `plugin/agy/verify-setup.mjs`, `plugin/agy/env-checks.mjs` | Offline setup check and repair (`npm run verify -- --fix`) |
+| `plugin/agy/manifest.mjs` | Writes `manifest.json` from the run directory: the bridge's rollups plus `harness`, `usage` and `cost` (three labeled lines) |
+| `plugin/agy/runRoot.mjs`, `plugin/agy/mmoSelect.mjs` | The `--inline-env` per-run root, and the `MMO_SELECT` door choice read from `.sdlc/local/mmo-select.json` |
+| `plugin/scripts/` | Scripts the skills call in an interactive session: `setup-policy.mjs` (the console), `write-provenance.mjs`, `write-contract-check.mjs`, `session-hydrate.mjs`, `mmo-log.mjs` and the rest |
+| `plugin/policy-console/` | The one UI: a local page (`npm run console`, then http://127.0.0.1:3000) to pick or customize a routing policy. Shows the agy driver pin on every card and carries it into saved policies |
+| `plugin/examples/` | The briefs the skills can offer, including the six brownfield fixtures |
+| `.agents/plugins/mmo/` | The discovery mount: symlinks into `plugin/`, which is how agy finds the plugin in a trusted workspace (check 10). Nothing is written under `~/.gemini/` |
+| `docs/verification/p1-agy-runtime.md` | Numbered runtime checks. Every pin cites one |
+| `examples/*/brief.md` | Briefs. `quick-demo` is the first paid run |
+| `tools/setup.mjs` | The setup wizard prompt 1 drives: checks, build, project registration, policy pick |
+| `tools/report.mjs` | Cost report over a run directory |
+| `tools/logfmt.mjs` | The actor gutter the report prints — who produced each line (conductor, judgment worker, mechanical worker, handoff) |
+| `tools/p1/live-checks.sh` | The scripted half of the runtime checks |
+| `tools/test/` | The offline suite `npm test` runs, including the stub `agy` under `fixtures/fake-agy/` |

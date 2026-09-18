@@ -35,3 +35,7 @@ Thumbs.db
 
 # Clones agy makes of the workspace inside itself during an interactive session (seen 2026-09-17 as ./Untitled/)
 /Untitled/
+
+# Python, only on machines that opted into the Antigravity SDK agent path
+__pycache__/
+plugin/mcp/model-dispatch/worker/.venv/

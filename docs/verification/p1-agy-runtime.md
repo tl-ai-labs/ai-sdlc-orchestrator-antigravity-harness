@@ -1,5 +1,7 @@
 # P1 — Antigravity CLI runtime verification
 
+> **For:** the numbered live checks every pin in `plugin/agy/` and every policy `driver:` block cites. Historical record — the results stay as recorded. **Also see:** [../running.md](../running.md#the-pin-gate) · [../architecture.md](../architecture.md).
+
 Numbered checks against the real `agy` binary and its bundled documentation, run before the driver
 layer is built. Every pin in `plugin/agy/` and every policy driver block cites a check number here.
 A check marked **pending** has not been exercised live; nothing may be pinned on it.

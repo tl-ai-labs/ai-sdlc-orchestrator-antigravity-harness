@@ -1,6 +1,6 @@
 # Brief template
 
-> **For:** writing your own project brief in the section layout the pipeline expects. **Also see:** [tutorial-first-run.md](tutorial-first-run.md) · [running.md](running.md).
+> **For:** writing your own project brief in the section layout the pipeline expects. **Also see:** [tutorial-first-run.md](tutorial-first-run.md) · [running.md](running.md) · [../examples/](../examples/).
 
 The driver reads the brief file at the path it is given. The requirements and
 architecture phases expect the section headings listed below; the wording

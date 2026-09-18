@@ -1,5 +1,7 @@
 # Running the harness
 
+> **For:** driving the harness — the interactive skills, every flag on the headless driver, the pin gate, the resume loop and what the run directory holds. **Also see:** [setup.md](setup.md) · [understanding-output.md](understanding-output.md) · [troubleshooting.md](troubleshooting.md).
+
 Two shapes. Interactive is how you build and debug the plugin; headless is how a measured run is recorded.
 
 ## Interactive

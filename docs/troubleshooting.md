@@ -1,5 +1,7 @@
 # Troubleshooting
 
+> **For:** symptom → cause → fix, keyed by the message on screen. **Also see:** [setup.md](setup.md) · [running.md](running.md) · [verification/p1-agy-runtime.md](verification/p1-agy-runtime.md).
+
 | Symptom | Cause | Fix |
 |---|---|---|
 | `run failed: run: the driver pin is not live-verified — checks 1, 2, 4, 5, 6 … are still pending` | The pin gate. The listed checks have not been run in a signed-in `agy` session | Run the checks and record them in `docs/verification/p1-agy-runtime.md`, flip them to `pass` in `plugin/agy/telemetry/fairnessPin.mjs` in the same commit — or pass `--allow-unverified-pin` and accept `pin.verified: false` in the manifest |

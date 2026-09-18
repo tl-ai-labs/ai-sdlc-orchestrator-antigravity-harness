@@ -7,6 +7,7 @@
     "node": ">=20"
   },
   "scripts": {
+    "setup": "node tools/setup.mjs",
     "build": "npm --prefix plugin/mcp/model-dispatch ci && npm --prefix plugin/mcp/model-dispatch run build",
     "verify": "node plugin/agy/verify-setup.mjs",
     "run": "node plugin/agy/run.mjs",

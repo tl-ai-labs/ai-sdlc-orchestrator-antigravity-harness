@@ -16,7 +16,7 @@
  *   - SETUP.md and plugin/skills/**.md are
  *     conductor-instruction files where "the user" is the correct third-person
  *     reference.
- *   - node_modules/, dist/, .venv/, .codex/, .sdlc/, src/, examples/ are
+ *   - node_modules/, dist/, .venv/, .agents/, .sdlc/, src/, examples/ are
  *     dependencies, build artifacts, runtime state, or pipeline outputs.
  *   - This test file itself, since it names SLOP_TERMS entries as strings.
  */
