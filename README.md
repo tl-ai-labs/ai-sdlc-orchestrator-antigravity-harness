@@ -52,10 +52,12 @@ You do not pick a Gemini door yourself — setup asks. You do not write a policy
 **Prompt 1 — setup.** Open `agy` in the folder you want to work in (an empty folder for greenfield, an existing repo for brownfield) and paste this verbatim:
 
 ```
-Set up this plugin from this repo - https://github.com/tl-ai-labs/ai-sdlc-orchestrator-antigravity-harness
+Set up this plugin from this repo - https://github.com/tl-ai-labs/ai-sdlc-orchestrator-antigravity-harness, branch feat/antigravity-harness-implementation
 ```
 
-agy follows [INSTALL.md](INSTALL.md): clones the harness next to your project (or finds an existing clone), builds the bundled MCP server, checks `agy`, `claude` and the credentials in your shell, asks whether to use the Antigravity SDK agent path (only when Vertex ADC is present), mounts the plugin into your project as `.agents/plugins/mmo/` (symlinks into the clone) so agy discovers it, and opens the browser once to pick this project's policy (or hit Save on `antigravity-flash38-plus-opus5`). Nothing is written under `~/.gemini/`.
+The branch matters until this work is merged: `main` has neither `tools/setup.mjs` nor the mount step, so a clone of the default branch would follow the old manual instructions and never mount the plugin.
+
+agy follows [INSTALL.md](INSTALL.md): clones that branch next to your project (or checks it out in an existing clone), builds the bundled MCP server, checks `agy`, `claude` and the credentials in your shell, asks whether to use the Antigravity SDK agent path (only when Vertex ADC is present), mounts the plugin into your project as `.agents/plugins/mmo/` (symlinks into the clone) so agy discovers it, and opens the browser once to pick this project's policy (or hit Save on `antigravity-flash38-plus-opus5`). Nothing is written under `~/.gemini/`.
 
 **Prompt 2 — run.** Start a **new `agy` session in the same folder**, answer **yes** when agy asks whether you trust the folder, then whichever fits:
 
@@ -71,7 +73,7 @@ agy follows [INSTALL.md](INSTALL.md): clones the harness next to your project (o
 Prefer to drive it yourself:
 
 ```bash
-git clone https://github.com/tl-ai-labs/ai-sdlc-orchestrator-antigravity-harness.git
+git clone --branch feat/antigravity-harness-implementation https://github.com/tl-ai-labs/ai-sdlc-orchestrator-antigravity-harness.git
 cd ai-sdlc-orchestrator-antigravity-harness && npm ci && npm run build
 node tools/setup.mjs --project-root /path/to/your/project
 ```
