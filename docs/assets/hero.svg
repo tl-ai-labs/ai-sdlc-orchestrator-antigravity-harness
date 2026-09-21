@@ -95,7 +95,7 @@
     <text x="820" y="262" text-anchor="middle" class="s" style="fill:#047857">manifest.json — rollups</text>
     <text x="820" y="278" text-anchor="middle" class="s" style="fill:#047857">telemetry.jsonl — every call</text>
     <text x="820" y="294" text-anchor="middle" class="s" style="fill:#047857">provenance.json — what changed</text>
-    <text x="820" y="310" text-anchor="middle" class="s" style="fill:#047857">final_report.md — cost per phase</text>
+    <text x="820" y="310" text-anchor="middle" class="s" style="fill:#047857">SUMMARY.md — the conductor's report</text>
     <text x="820" y="338" text-anchor="middle" class="note">three cost lines, each labeled</text>
   </g>
 </svg>
