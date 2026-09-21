@@ -2,6 +2,7 @@
 
 > **For:** driving the harness — the interactive skills, every flag on the headless driver, the pin gate, the resume loop and what the run directory holds. **Also see:** [setup.md](setup.md) · [understanding-output.md](understanding-output.md) · [troubleshooting.md](troubleshooting.md).
 
+
 Two shapes. Interactive is how you build and debug the plugin; headless is how a measured run is recorded.
 
 ## Interactive
@@ -15,7 +16,7 @@ node plugin/agy/run.mjs \
   --brief=examples/quick-demo/brief.md \
   --project-root=/path/to/empty/dir \
   --output-dir=/path/to/empty/dir/.sdlc \
-  --policy=antigravity-flash38-plus-haiku45 \
+  --policy=antigravity-flash38-plus-opus5 \
   --gates=auto-approve \
   --run-id=quick-demo-1 \
   --dry-run

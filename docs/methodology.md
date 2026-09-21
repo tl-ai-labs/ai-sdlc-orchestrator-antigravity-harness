@@ -2,6 +2,7 @@
 
 > **For:** understanding how tokens and costs are counted — which figures are vendor-metered, which are modeled, and why the two are never added. **Also see:** [understanding-output.md](understanding-output.md) · [architecture.md](architecture.md#three-cost-lines) · [logging.md](logging.md).
 
+
 How the tokens and costs on the report are derived, in plain terms.
 
 ## Three cost lines
@@ -91,12 +92,11 @@ The rates that turn tokens into dollars live in one dated price list, [`plugin/m
 
 The list gives each model one or more periods (`from`, `to`, the five token rates, `source_url`, `verified`) and prices a model name on a day. `resolveModel(name)` maps an id (optionally with a `-YYYYMMDD` suffix or one bracketed option such as `[1m]`) to the list; `lookupPrice(name, date, {speed, service_tier, inference_geo})` returns the period's rates with fast mode or US-only inference applied, or `unpriced` with the reason. A rate is never borrowed from a similar model.
 
-The Claude rows were verified on 2026-09-14 against [Anthropic's pricing page](https://platform.claude.com/docs/en/about-claude/pricing). Rates are USD per 1M tokens: a 5-minute cache write is 1.25× input, a 1-hour cache write is 2× input, and a cache read is 0.1× input (0.025× on Fable 5.1). The models this harness ships are:
+The Claude rows were verified on 2026-09-14 against [Anthropic's pricing page](https://platform.claude.com/docs/en/about-claude/pricing). Rates are USD per 1M tokens: a 5-minute cache write is 1.25× input, a 1-hour cache write is 2× input, and a cache read is 0.1× input (0.025× on Fable 5.1). The model this harness ships is:
 
 | Model | Input | Cache read | Cache write, 5 min | Cache write, 1 h | Output | Fast mode (input / output) | US-only inference ×1.1 |
 |---|---|---|---|---|---|---|---|
 | `claude-opus-5` | 5.00 | 0.50 | 6.25 | 10.00 | 25.00 | 10.00 / 50.00 | yes |
-| `claude-haiku-4-5` | 1.00 | 0.10 | 1.25 | 2.00 | 5.00 | — | — |
 
 The list carries every other model on Anthropic's page as well; `claude-cli` prices a helper or side call on another model at that model's own rate.
 

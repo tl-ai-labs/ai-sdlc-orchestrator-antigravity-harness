@@ -10,7 +10,7 @@ Learn by doing. Follow along top to bottom, no prior knowledge assumed.
 
 | Doc | For |
 |---|---|
-| [Your first `/mmo:greenfield`](tutorial-first-run.md) | Twenty minutes from a fresh setup to a completed greenfield run: the $0 offline smoke run first, then the real thing on the cents-only policy. |
+| [Your first `/mmo:greenfield`](tutorial-first-run.md) | Twenty minutes from a fresh setup to a completed greenfield run: the $0 offline smoke run first, then the real thing. |
 
 ## How-to guides
 

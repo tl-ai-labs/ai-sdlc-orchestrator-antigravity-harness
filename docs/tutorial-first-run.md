@@ -7,7 +7,7 @@ Twenty minutes end to end. You set up the plugin, prove the whole chain offline 
 ## What you'll need
 
 - **Node.js 20+**, the **Antigravity CLI** (`agy` ≥ 1.2.3, signed in to a Google account) and **Claude Code** (`claude`). Verify with `node --version`, `agy models` and `claude --version`.
-- **A Claude wallet.** Cheapest for a first run: Claude Code signed in to a claude.ai subscription (`claude auth status` shows `authMethod: claude.ai`). The Opus line is then modeled, not billed. An `ANTHROPIC_API_KEY` with $2 of budget works too and makes it cash.
+- **A Claude wallet.** Cheapest for a first run: Claude Code signed in to a claude.ai subscription (`claude auth status` shows `authMethod: claude.ai`). The Opus line is then modeled, not billed. An `ANTHROPIC_API_KEY` with a few dollars of budget works too and makes it cash.
 - **A Gemini door.** A `GEMINI_API_KEY` from [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey), or Application Default Credentials from `gcloud auth application-default login`. There is no all-Claude preset on this harness — the conductor itself is Gemini, and so is the mechanical tier.
 
 Export the key(s) in the shell you will start `agy` from. The bridge inherits them from there and nowhere else.
@@ -24,7 +24,7 @@ mkdir first-run && cd first-run && agy
 Set up this plugin from this repo - https://github.com/tl-ai-labs/ai-sdlc-orchestrator-antigravity-harness, branch feat/antigravity-harness-implementation
 ```
 
-agy follows [INSTALL.md](../INSTALL.md): it clones the harness next to your folder, builds the bridge, checks `agy`, `claude` and your credentials, asks about the Antigravity SDK agent path only if Vertex ADC is present (say no on a first run), mounts the plugin into your folder as `.agents/plugins/mmo/`, and opens a browser tab for the policy pick. Click **Save** on `antigravity-flash38-plus-haiku45` — the same routing as the study policy with Haiku 4.5 as the judge, capped at $5. You can switch to `antigravity-flash38-plus-opus5` later with `/mmo:policy change`.
+agy follows [INSTALL.md](../INSTALL.md): it clones the harness next to your folder, builds the bridge, checks `agy`, `claude` and your credentials, asks about the Antigravity SDK agent path only if Vertex ADC is present (say no on a first run), mounts the plugin into your folder as `.agents/plugins/mmo/`, and opens a browser tab for the policy pick. Click **Save** on `antigravity-flash38-plus-opus5` — the one shipped policy: Gemini 3.8 Flash conducts, Opus 5 judges, Flash executes, capped at $50.
 
 Total time: about three minutes on a fresh laptop. Nothing has been spent yet.
 
@@ -71,7 +71,7 @@ Before any money is spent, the conductor shows you the phase list, the model eac
 
 The pipeline pauses at four points:
 
-- **Gate 1** — after `requirements.md` is written (by Haiku, through the bridge).
+- **Gate 1** — after `requirements.md` is written (by Opus 5, through the bridge).
 - **Gate 2** — after `design.md` is written.
 - **Gate 3** — after `security_review.md` is written.
 - **Gate 4** — after the final report.
@@ -91,12 +91,12 @@ node tools/report.mjs ../first-run/.sdlc
 Then rebuild the manifest with the wallet stamped (the conductor prints this command as its last step in an interactive run):
 
 ```bash
-node plugin/agy/manifest.mjs ../first-run/.sdlc --policy=antigravity-flash38-plus-haiku45
+node plugin/agy/manifest.mjs ../first-run/.sdlc --policy=antigravity-flash38-plus-opus5
 ```
 
 What you are looking at:
 
-- **Dispatched work — vendor-metered** — one row per phase, tokens in / out, cost. The judgment rows ran on Haiku through `claude -p`; the mechanical rows on Gemini 3.8 Flash. On the seat the Haiku tokens are real and the dollars are modeled — `manifest.json` → `cost.claude_seat_modeled_usd` says so.
+- **Dispatched work — vendor-metered** — one row per phase, tokens in / out, cost. The judgment rows ran on Opus 5 through `claude -p`; the mechanical rows on Gemini 3.8 Flash. On the seat the Opus tokens are real and the dollars are modeled — `manifest.json` → `cost.claude_seat_modeled_usd` says so.
 - **Driver loop — modeled, not measured** — on an interactive run this section reads _No driver turns recorded._, because agy exposes no `usage` counters to a plugin. Headless runs through `run.mjs` fill it.
 - **`manifest.json` → `cost.lines`** — the three lines, each with `kind: "cash"` or `"modeled"`, and the note that they are not summed.
 
@@ -119,7 +119,7 @@ Then `curl http://localhost:3000/ping` — `{ "status": "ok", "time": "…" }` i
 An interactive run has no driver line. The run of record goes through the headless launcher, which pins the conductor's model and effort, answers the gates itself, and prices every conductor turn from the stream:
 
 ```bash
-node plugin/agy/run.mjs --brief=examples/quick-demo/brief.md --project-root=/tmp/demo --output-dir=/tmp/demo/.sdlc --policy=antigravity-flash38-plus-haiku45 --gates=auto-approve --run-id=quick-demo-1 --dry-run
+node plugin/agy/run.mjs --brief=examples/quick-demo/brief.md --project-root=/tmp/demo --output-dir=/tmp/demo/.sdlc --gates=auto-approve --run-id=quick-demo-1 --dry-run
 ```
 
 `--dry-run` prints the pinned invocation with every credential reported as set/unset. Drop it to run. [running.md](running.md) has every flag, the pin gate and the resume loop.
@@ -128,7 +128,7 @@ node plugin/agy/run.mjs --brief=examples/quick-demo/brief.md --project-root=/tmp
 
 - **Understand the numbers.** [understanding-output.md](understanding-output.md) walks every field in the two JSONL files, the manifest and the report.
 - **Understand the cost model.** [methodology.md](methodology.md) explains the three lines and why modeled and cash dollars are never added.
-- **Move to the study policy.** `/mmo:policy change`, pick `antigravity-flash38-plus-opus5`. Same routing, Opus 5 as the judge, cap $50.
+- **Tune the policy.** `/mmo:policy change` opens the console; a copy you save there keeps the driver pin and can change the per-phase routing or the cap.
 - **Run on an existing repo.** [brownfield.md](brownfield.md) covers `/mmo:brownfield`, which extends real code with a non-destructive write contract.
 
 **See also:** [setup.md](setup.md) · [running.md](running.md) · [troubleshooting.md](troubleshooting.md)

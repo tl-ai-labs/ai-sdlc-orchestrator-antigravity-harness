@@ -24,7 +24,7 @@ test("run.mjs completes a two-invocation run against the stub agy and writes eve
     const out = join(proj, ".sdlc");
     const r = spawnSync(process.execPath, [
       join(ROOT, "plugin", "agy", "run.mjs"), `--project-root=${proj}`, `--output-dir=${out}`,
-      "--policy=antigravity-flash38-plus-haiku45", "--gates=auto-approve", "--run-id=smoke", "--allow-unverified-pin", `--agy-bin=${FAKE_AGY}`,
+      "--policy=antigravity-flash38-plus-opus5", "--gates=auto-approve", "--run-id=smoke", "--allow-unverified-pin", `--agy-bin=${FAKE_AGY}`,
     ], { encoding: "utf8", timeout: 120_000 });
     assert.equal(r.status, 0, r.stderr + r.stdout);
     assert.match(r.stdout, /resuming fake-conv-/, "the first invocation ended without SUMMARY.md and was resumed");

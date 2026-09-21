@@ -369,7 +369,7 @@ const TODAY = new Date().toISOString().slice(0, 10);
 
 test("every shipped policy's pricing card equals the price list for today's date", () => {
   const files = policyFiles();
-  assert.ok(files.length >= 10, `expected the shipped and fixture policies under ${POLICY_DIR} and ${FIXTURE_POLICY_DIR}`);
+  assert.ok(files.some((f) => f.startsWith(POLICY_DIR)) && files.some((f) => f.startsWith(FIXTURE_POLICY_DIR)), `expected the shipped and fixture policies under ${POLICY_DIR} and ${FIXTURE_POLICY_DIR}`);
   const problems = [];
   let checked = 0;
   for (const file of files) {

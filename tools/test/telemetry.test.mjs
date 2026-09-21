@@ -84,7 +84,7 @@ test("extractToolCalls tolerates the step shapes it may see", () => {
 // ── fairness pin ──────────────────────────────────────────────────────────
 
 test("readPin reads the pin off the shipped policies' driver block and derives the slug", () => {
-  for (const name of ["antigravity-flash38-plus-opus5", "antigravity-flash38-plus-haiku45"]) {
+  for (const name of ["antigravity-flash38-plus-opus5"]) {
     const pin = readPin(policy(name));
     assert.equal(driverSlug(pin), "gemini-3.8-flash-high");
     assert.equal(pin.billing_mode, "seat");

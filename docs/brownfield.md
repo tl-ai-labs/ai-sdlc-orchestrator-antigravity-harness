@@ -2,6 +2,8 @@
 
 > **For:** running the plugin on an existing repo — Gate 0, the seven job types, the write contract. **Also see:** [brownfield-write-contract.md](brownfield-write-contract.md) · [brownfield-routing.md](brownfield-routing.md) · [brownfield-setup-issues.md](brownfield-setup-issues.md).
 
+![The pipeline's phases and gates — brownfield adds discovery and change_plan around the greenfield core, and Gate 0 before any other gate](assets/phases-and-gates.svg)
+
 The AI-SDLC Orchestrator plugin ships in two modes:
 
 - **Greenfield** (`/mmo:greenfield`) — generates a whole new application from a project brief into an
@@ -11,7 +13,7 @@ The AI-SDLC Orchestrator plugin ships in two modes:
   one Gate 0 confirmation screen, run the pipeline with a non-destructive write contract that
   guarantees off-limits files stay untouched.
 
-Both modes share the same install (SETUP.md), same policies (`antigravity-flash38-plus-opus5` / `antigravity-flash38-plus-haiku45`),
+Both modes share the same install (SETUP.md), same policy (`antigravity-flash38-plus-opus5`),
 same MCP dispatch layer. What differs is what happens after the setup check completes.
 
 This doc walks brownfield end-to-end. For the greenfield equivalent see [/mmo:greenfield's operating

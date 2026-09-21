@@ -6,6 +6,7 @@
 
 ![How the plugin works — you paste two prompts in agy, Gemini 3.8 Flash conducts and dispatches every phase through the bridge, judgment work goes to Claude Opus 5 and mechanical work to Gemini 3.8 Flash, and your project gets both generated code and a full audit trail](docs/assets/hero.svg)
 
+
 ## What this is
 
 An Antigravity CLI (`agy`) plugin that runs a full SDLC pipeline — requirements → design → code → tests → docs → senior review → security review — against either an empty folder (**greenfield**) or an existing repository (**brownfield**). It is the third runtime harness for the same `mmo` plugin and the same `model-dispatch` bridge, after the [Claude Code harness](https://github.com/tl-ai-labs/ai-sdlc-orchestrator-claude-code-harness) and the [Codex harness](https://github.com/tl-ai-labs/ai-sdlc-orchestrator-codex-harness).
@@ -133,12 +134,11 @@ Two guardrails ship on:
 - **Escalation** — a mechanical-tier packet that fails validation twice auto-routes to Opus 5 on the third attempt. Prevents infinite retries when Flash can't solve a particular puzzle.
 - **Hard cost cap** — `hard_cost_cap_usd: 50` per run ([antigravity-flash38-plus-opus5.yaml:154](plugin/config/policies/antigravity-flash38-plus-opus5.yaml)). The policy declares it, the console shows it on every card and carries it into saved policies, and the pricing preflight reads the policy back to you before any paid run. Raise or lower it in your own policy.
 
-Two policies ship:
+One policy ships:
 
 | Policy | Uses | Cap |
 |---|---|---|
 | `antigravity-flash38-plus-opus5` (default) | Gemini 3.8 Flash conducts, Opus 5 judges, Flash executes — the study policy | $50 |
-| `antigravity-flash38-plus-haiku45` | Same routing with Haiku 4.5 as the judge — proves the wiring for cents | $5 |
 
 The Claude Code harness's `opus-*` and `flash-*` presets are not shipped here; they live under `plugin/mcp/model-dispatch/test/fixtures/policies/` as routing-engine test fixtures.
 
@@ -269,11 +269,12 @@ Every artifact lands under `./.sdlc/` (for `/mmo:greenfield` and `run.mjs`'s def
 | `.hook-logs/hook.jsonl` | One line per bridge call, from the `PostToolUse` heartbeat. Backup beside the bridge's own ledger; safe to delete. Interactive runs only. |
 | Cost report | `node tools/report.mjs <run-dir>` — per-phase table, the driver loop in its own **modeled, not measured** section, delegation table if any, provenance key. |
 
+
 Full reference in [docs/understanding-output.md](docs/understanding-output.md).
 
 ## Try it — one offline run
 
-No measured (paid) run has been published yet; the first will be the [Ping Service](examples/quick-demo/) brief under `antigravity-flash38-plus-haiku45`, then under `antigravity-flash38-plus-opus5`. Until then, the whole chain runs end to end against the stub `agy` in `tools/test/fixtures/fake-agy/` — no sign-in, no credentials, $0:
+No measured (paid) run has been published yet; the first will be the [Ping Service](examples/quick-demo/) brief under `antigravity-flash38-plus-opus5`. Until then, the whole chain runs end to end against the stub `agy` in `tools/test/fixtures/fake-agy/` — no sign-in, no credentials, $0:
 
 ```bash
 mkdir -p /tmp/smoke && cp examples/quick-demo/brief.md /tmp/smoke/brief.md

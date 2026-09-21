@@ -39,7 +39,6 @@ Two shipped policies represent the two ends of the trade-off:
 | Policy | Where everything runs | Typical mid-size run cost |
 |---|---|---|
 | `antigravity-flash38-plus-opus5` (default) | Gemini 3.8 Flash conducts, Opus 5 judges, Flash executes. Cap $50 | not yet measured |
-| `antigravity-flash38-plus-haiku45` | Same routing, Haiku 4.5 judges. Cap $5 | not yet measured |
 
 ~10× reduction on the same output because 60-80% of a full run is mechanical work that fits
 what Flash is good at (pattern-matching, in-context generation, filling schema-driven
@@ -75,9 +74,9 @@ Five ways to change routing:
 2. **`/mmo:policy change`** — the everyday way. Opens the browser console, pick or author a
    policy, saved to `.sdlc/project.json.default_policy`. Every subsequent run in this folder
    uses it until changed again.
-3. **Pick a different shipped policy for one run** — pass `--policy <name>` to `/mmo:pass`,
-   or type it at Gate 0 in `/mmo:brownfield`. The other shipped preset is `antigravity-flash38-plus-haiku45` (Haiku 4.5
-   needed, ~10× more per run). v1.5 will ship `ci-strict` (blocks writes unless
+3. **Pick a different on-disk policy for one run** — pass `--policy <name>` to `/mmo:pass`,
+   or type it at Gate 0 in `/mmo:brownfield`. Only the study policy ships; any other name is one
+   you saved from the console. v1.5 will ship `ci-strict` (blocks writes unless
    `--allow-write`), `bedrock-claude-only`, `vertex-mixed`, and `self-hosted-only`.
 4. **Author a custom policy in the browser console** — the recommended path for new
    customizations, and the same console setup uses. `plugin/policy-console/` is a single HTML

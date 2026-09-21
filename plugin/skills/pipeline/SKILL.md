@@ -418,7 +418,7 @@ mid-gate, session-hydrate detects a non-terminal state and re-prompts on the nex
 > - **Stack:** `<top-detected stacks>` — correct? add/override?
 > - **Test command:** `<detected>` — enter to accept, or paste the command.
 > - **Policy:** `<the default_policy field setup wrote to .sdlc/project.json>` — accept, or
->   name another on-disk policy for this run only (e.g. `antigravity-flash38-plus-haiku45`). To change the project's
+>   name another on-disk policy for this run only (one saved from the policy console). To change the project's
 >   persistent default, re-run setup (`node "${MMO_PLUGIN_ROOT}/scripts/setup-policy.mjs"`
 >   — this is the one command that opens a browser; every other setup step is terminal-only).
 > - **Existing AI setup:** `<verbatim list from Tier 1 group 6>` — is any of this

@@ -38,7 +38,7 @@ test("INSTALL.md and SETUP.md describe the project-folder flow: clone beside, re
   assert.match(install, /new\*\* `agy` session/);
   const setup = read("SETUP.md");
   assert.match(setup, /Arm A/); assert.match(setup, /Arm B/);
-  assert.match(setup, /antigravity-flash38-plus-haiku45/);
+  assert.match(setup, /antigravity-flash38-plus-opus5/);
   assert.match(setup, /Before any paid run/);
 });
 

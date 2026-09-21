@@ -16,8 +16,8 @@ run() { # name, extra-args..., prompt
   tail -c 400 "$OUT/$name.jsonl"; echo
 }
 
-P1='List every tool in your toolset whose name contains model-dispatch, model_dispatch, load_policy or execute_with_model. Print their exact names one per line under the heading TOOLS. Then call the load_policy tool (whatever its exact prefixed name is) with policy_name antigravity-flash38-plus-haiku45 and print under RESULT the policy name and the model ids it returned. Do not run any shell command.'
-P5='Call the preflight_dispatch tool (whatever its exact prefixed name is) with auth_mode vendor and policy_name antigravity-flash38-plus-haiku45. Print the full JSON result it returns. Do not run any shell command.'
+P1='List every tool in your toolset whose name contains model-dispatch, model_dispatch, load_policy or execute_with_model. Print their exact names one per line under the heading TOOLS. Then call the load_policy tool (whatever its exact prefixed name is) with policy_name antigravity-flash38-plus-opus5 and print under RESULT the policy name and the model ids it returned. Do not run any shell command.'
+P5='Call the preflight_dispatch tool (whatever its exact prefixed name is) with auth_mode vendor and policy_name antigravity-flash38-plus-opus5. Print the full JSON result it returns. Do not run any shell command.'
 
 run 1-mcp-route      --dangerously-skip-permissions "$P1"
 run 2-with-sandbox   --dangerously-skip-permissions --sandbox "$P1"

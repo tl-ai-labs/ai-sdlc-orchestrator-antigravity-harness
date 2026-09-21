@@ -50,18 +50,17 @@ test("a policy customized from a base with no driver block gets none invented", 
 });
 
 test("the summary exposes the driver pin and the cap for the page to show", () => {
-  const s = summarizePolicy("antigravity-flash38-plus-haiku45", load("antigravity-flash38-plus-haiku45"), "");
+  const s = summarizePolicy("antigravity-flash38-plus-opus5", load("antigravity-flash38-plus-opus5"), "");
   assert.equal(s.origin, "preset");
   assert.equal(s.driver.model_name, "gemini-3.8-flash");
   assert.equal(s.driver.reasoning.effort, "high");
-  assert.equal(s.hardCostCapUsd, 5);
+  assert.equal(s.hardCostCapUsd, 50);
   const driverless = load("antigravity-flash38-plus-opus5"); delete driverless.driver;
   assert.equal(summarizePolicy("driverless", driverless, "").driver, null);
 });
 
-test("the antigravity presets are presets, and the claude-cli label names the two arms", () => {
-  assert.ok(SHIPPED_PRESETS.includes("antigravity-flash38-plus-opus5"));
-  assert.ok(SHIPPED_PRESETS.includes("antigravity-flash38-plus-haiku45"));
+test("the antigravity preset is a preset, and the claude-cli label names the two arms", () => {
+  assert.deepEqual(SHIPPED_PRESETS, ["antigravity-flash38-plus-opus5"]);
   assert.match(ADAPTER_LABEL["claude-cli"], /arm A.*arm B/);
   assert.ok(!/Max subscription/.test(ADAPTER_LABEL["claude-cli"]));
 });

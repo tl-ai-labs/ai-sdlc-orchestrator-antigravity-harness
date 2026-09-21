@@ -88,7 +88,6 @@ const ANTHROPIC_EFFORT_TIERS = ["off", "low", "medium", "high", "xhigh", "max"];
 // tools/test/policy-console-presets.test.mjs fails when this list and the
 // directory disagree.
 const SHIPPED_PRESETS = [
-  "antigravity-flash38-plus-haiku45",
   "antigravity-flash38-plus-opus5",
 ];
 const NAME_PATTERN = /^[a-z0-9][a-z0-9-]*$/;
@@ -111,8 +110,8 @@ function listPolicyIds() {
     .filter((f) => f.endsWith(".yaml"))
     .map((f) => f.replace(/\.yaml$/, ""))
     .sort((a, b) => {
-      // The study policy first, its wiring-proof twin second, then the carried presets.
-      const rank = (id) => (id === "antigravity-flash38-plus-opus5" ? 0 : id === "antigravity-flash38-plus-haiku45" ? 1 : 2);
+      // The study policy first, then anything saved from the console.
+      const rank = (id) => (id === "antigravity-flash38-plus-opus5" ? 0 : 1);
       if (rank(a) !== rank(b)) return rank(a) - rank(b);
       return a.localeCompare(b);
     });

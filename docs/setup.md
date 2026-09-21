@@ -120,7 +120,6 @@ The console (`plugin/policy-console/`, opened by `plugin/scripts/setup-policy.mj
 | Preset | Use |
 |---|---|
 | `antigravity-flash38-plus-opus5` | The study policy. Gemini 3.8 Flash conducts; Opus 5 at high effort on judgment phases; Flash on mechanical. Cap $50 |
-| `antigravity-flash38-plus-haiku45` | Identical routing with Haiku 4.5 as the judgment worker. Proves the wiring for cents. Cap $5 |
 
 The Claude harness's `opus-*` / `flash-*` presets are not shipped here; they live under `plugin/mcp/model-dispatch/test/fixtures/policies/` as routing-engine test fixtures.
 
@@ -145,4 +144,4 @@ node tools/setup.mjs --project-root /path/to/your/project
 4. The pricing blocks in the policy match `plugin/mcp/model-dispatch/src/prices.ts` (`prices.test.mjs` enforces it).
 5. An explicit go from the study owner.
 
-First paid run: `examples/quick-demo/brief.md` under `antigravity-flash38-plus-haiku45`, then under `antigravity-flash38-plus-opus5`.
+First paid run: `examples/quick-demo/brief.md` under `antigravity-flash38-plus-opus5`.

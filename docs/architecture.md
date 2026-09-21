@@ -2,6 +2,7 @@
 
 > **For:** understanding how a request flows through the harness — conductor, bridge, dispatch routes, hooks, records — and finding any file. **Also see:** [running.md](running.md) · [methodology.md](methodology.md) · [repo-overview.md](repo-overview.md).
 
+
 The conductor shape: a cheap conductor runs the loop, every model call goes through the bridge, the harness around the conductor writes the records.
 
 ```
@@ -78,7 +79,7 @@ Hook commands run with cwd = the directory containing `hooks.json` (the plugin d
 | `plugin/mcp/model-dispatch/` | The bridge: routing policy → adapter → model, with its own telemetry ledger. `dist/` is gitignored; `npm run build` produces it |
 | `plugin/mcp/model-dispatch/src/prices.ts` | The dated price cards every policy's pricing block must match (`prices.test.mjs` enforces it) |
 | `plugin/mcp/model-dispatch/worker/gemini_worker.py` | The Antigravity SDK agent worker — the only Python file, installed only on machines that chose the agent path |
-| `plugin/config/policies/` | The two routing policies this harness ships: `antigravity-flash38-plus-opus5.yaml` (the study policy) and `antigravity-flash38-plus-haiku45.yaml` (same routing, Haiku 4.5 as judge — proves the wiring for cents). The Claude harness's other presets are bridge test fixtures only |
+| `plugin/config/policies/` | The one routing policy this harness ships, `antigravity-flash38-plus-opus5.yaml`: Gemini 3.8 Flash conducts, Opus 5 judges, Flash executes. The Claude harness's presets are bridge test fixtures only |
 | `plugin/agy/run.mjs` | The headless driver: builds the pinned `agy --print` invocation, captures stream-json, runs the resume loop, writes the driver's modeled cost and the manifest |
 | `plugin/agy/prompts/conductor.md` | The conductor prompt: state machine, TaskPacket contract, gates, the MCP route and the dispatch fallback |
 | `plugin/agy/telemetry/` | `fairnessPin.mjs` reads the pin off the policy's `driver:` block; `event-reader.mjs` prices stream-json `usage` as a labeled modeled line |

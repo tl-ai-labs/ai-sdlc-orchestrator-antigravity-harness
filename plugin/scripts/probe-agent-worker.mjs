@@ -39,7 +39,7 @@ export function agentLeafFrom(policy) {
     throw new Error(
       `Policy '${policy?.name ?? "?"}' declares no agent-worker leaf ` +
         `(no model with adapter: ${AGENT_ADAPTER}), so there is nothing here to probe. ` +
-        `The shipped policies that have one are antigravity-flash38-plus-opus5 and antigravity-flash38-plus-haiku45.`
+        `The shipped policy that has one is antigravity-flash38-plus-opus5.`
     );
   }
   if (leaves.length > 1) {

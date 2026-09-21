@@ -49,13 +49,13 @@ test("registerProject creates the mount once, reports no change the second time,
 test("the wizard runs non-interactively against an empty project and leaves it registered with a policy", () => {
   const dir = mkdtempSync(join(tmpdir(), "agy-setup-run-"));
   try {
-    const r = spawnSync(process.execPath, [join(ROOT, "tools", "setup.mjs"), `--project-root=${dir}`, "--yes", "--no-agent", "--policy=antigravity-flash38-plus-haiku45"], {
+    const r = spawnSync(process.execPath, [join(ROOT, "tools", "setup.mjs"), `--project-root=${dir}`, "--yes", "--no-agent", "--policy=antigravity-flash38-plus-opus5"], {
       encoding: "utf8", timeout: 120_000,
       env: { ...process.env, ANTHROPIC_API_KEY: "sk-ant-dummy", GEMINI_API_KEY: "AIza-dummy" },
     });
     const out = r.stdout.replace(/\x1b\[[0-9;]*m/g, "");
     assert.ok(existsSync(join(dir, ".agents", "plugins", "mmo", "plugin.json")), out);
-    assert.equal(JSON.parse(readFileSync(join(dir, ".sdlc", "project.json"), "utf8")).default_policy, "antigravity-flash38-plus-haiku45");
+    assert.equal(JSON.parse(readFileSync(join(dir, ".sdlc", "project.json"), "utf8")).default_policy, "antigravity-flash38-plus-opus5");
     assert.match(out, /Mount the plugin in this project/);
     assert.match(out, /Arm A: ANTHROPIC_API_KEY is set/);
     assert.match(out, /Start a NEW agy session|Setup incomplete/);

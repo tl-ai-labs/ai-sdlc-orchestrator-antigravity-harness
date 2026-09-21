@@ -76,7 +76,7 @@ Agent-side steps (1 = discovery smoke, 3 = dispatch smoke) — you run yourself:
 3. **Dispatch smoke.** Construct a trivial `{ id: "smoke-1", phase: "codegen", task_type:
    "smoke", instruction: "Return the literal string OK", ... }` TaskPacket, write it to a file,
    and dispatch it to each policy tier the current policy uses (premium + mechanical for
-   `antigravity-flash38-plus-opus5`; the same two tiers for `antigravity-flash38-plus-haiku45`) —
+   `antigravity-flash38-plus-opus5`) —
    through `call_mcp_tool` → `mmo_model-dispatch` / `execute_with_model` when the bridge is connected
    to this session, otherwise:
    ```bash
@@ -185,7 +185,7 @@ template from [plugin/skills/pipeline/SKILL.md](/plugin/skills/pipeline/SKILL.md
   run setup first (see [SETUP.md](/SETUP.md) §5 — the one setup step that opens a browser
   for the policy console). Do not silently default and do not launch the console from here.
   Otherwise show the resolved name; accept, or accept an on-disk policy name for this run only
-  (e.g. `antigravity-flash38-plus-haiku45`) — a per-run override does not overwrite the project default.
+  (one saved from the policy console) — a per-run override does not overwrite the project default.
 - **Existing AI setup** — verbatim list from `baseline.ai_configs_detected`. Default is
   **OFF-LIMITS** for all of them. User can move any into the allowlist by naming it explicitly.
 - **Intent** — from step 4a. Re-confirm, even when the handover pre-set it.

@@ -508,7 +508,7 @@ async function interactiveFlow(resolved, args) {
 
   const { added, modified } = diffPolicies(before);
   // Strip the .yaml extension — `default_policy` in project.json is a policy
-  // *name* (`antigravity-flash38-plus-opus5`, `antigravity-flash38-plus-haiku45`), not a filename. Downstream
+  // *name* (`antigravity-flash38-plus-opus5`), not a filename. Downstream
   // consumers (session-hydrate, MCP policy loader, /mmo:policy print) all
   // treat it as the bare stem; the old single-candidate branch left the
   // extension on, producing `default_policy="foo.yaml"` and 404s downstream.
