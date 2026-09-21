@@ -48,6 +48,10 @@ Reasoning-forward. Understand why the pieces are shaped the way they are.
 | [Brownfield coexistence](brownfield-coexistence.md) | Living alongside Cursor, Aider, Copilot, and custom MCP servers. |
 | [Brownfield privacy](brownfield-privacy.md) | What leaves the machine, per phase. On-prem routing, PII handling, audit trail. |
 
+## Diagrams
+
+The SVGs under [assets/](assets/) are the pictures the README and the docs embed: [hero.svg](assets/hero.svg) (the two prompts and the cast), [dispatch-routes.svg](assets/dispatch-routes.svg) (interactive vs headless), [phases-and-gates.svg](assets/phases-and-gates.svg) (the state machine), [cost-lines.svg](assets/cost-lines.svg) (modeled vs cash). Each carries a `<desc>` so it reads without rendering.
+
 ## For maintainers
 
 - [Contributing](../CONTRIBUTING.md) — style rules, PR process, base branch.

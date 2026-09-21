@@ -6,7 +6,6 @@
 
 ![How the plugin works — you paste two prompts in agy, Gemini 3.8 Flash conducts and dispatches every phase through the bridge, judgment work goes to Claude Opus 5 and mechanical work to Gemini 3.8 Flash, and your project gets both generated code and a full audit trail](docs/assets/hero.svg)
 
-
 ## What this is
 
 An Antigravity CLI (`agy`) plugin that runs a full SDLC pipeline — requirements → design → code → tests → docs → senior review → security review — against either an empty folder (**greenfield**) or an existing repository (**brownfield**). It is the third runtime harness for the same `mmo` plugin and the same `model-dispatch` bridge, after the [Claude Code harness](https://github.com/tl-ai-labs/ai-sdlc-orchestrator-claude-code-harness) and the [Codex harness](https://github.com/tl-ai-labs/ai-sdlc-orchestrator-codex-harness).
@@ -269,6 +268,7 @@ Every artifact lands under `./.sdlc/` (for `/mmo:greenfield` and `run.mjs`'s def
 | `.hook-logs/hook.jsonl` | One line per bridge call, from the `PostToolUse` heartbeat. Backup beside the bridge's own ledger; safe to delete. Interactive runs only. |
 | Cost report | `node tools/report.mjs <run-dir>` — per-phase table, the driver loop in its own **modeled, not measured** section, delegation table if any, provenance key. |
 
+![Three cost lines — the driver is modeled from agy's usage counters, the Gemini workers are cash, the Claude worker is cash on an Anthropic key or Vertex and modeled on the claude.ai seat; the two kinds of dollars are never summed](docs/assets/cost-lines.svg)
 
 Full reference in [docs/understanding-output.md](docs/understanding-output.md).
 

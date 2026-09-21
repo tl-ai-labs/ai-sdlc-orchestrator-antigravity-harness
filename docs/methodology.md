@@ -2,6 +2,7 @@
 
 > **For:** understanding how tokens and costs are counted — which figures are vendor-metered, which are modeled, and why the two are never added. **Also see:** [understanding-output.md](understanding-output.md) · [architecture.md](architecture.md#three-cost-lines) · [logging.md](logging.md).
 
+![Three cost lines — the driver (Gemini 3.8 Flash on agy, modeled from stream-json usage), the Gemini workers (mechanical phases, cash on a key or Vertex) and the Claude worker (Opus 5 through claude -p, cash on arm A or B, modeled on the seat) — with the manifest's note that the two kinds of dollars are not summed](assets/cost-lines.svg)
 
 How the tokens and costs on the report are derived, in plain terms.
 

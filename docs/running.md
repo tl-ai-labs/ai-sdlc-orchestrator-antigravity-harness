@@ -2,6 +2,7 @@
 
 > **For:** driving the harness — the interactive skills, every flag on the headless driver, the pin gate, the resume loop and what the run directory holds. **Also see:** [setup.md](setup.md) · [understanding-output.md](understanding-output.md) · [troubleshooting.md](troubleshooting.md).
 
+![The pipeline's phases and gates — eleven greenfield states with gates after requirements, design and security review and before final acceptance; brownfield adds discovery, change_plan and Gate 0](assets/phases-and-gates.svg)
 
 Two shapes. Interactive is how you build and debug the plugin; headless is how a measured run is recorded.
 

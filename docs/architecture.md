@@ -2,6 +2,7 @@
 
 > **For:** understanding how a request flows through the harness — conductor, bridge, dispatch routes, hooks, records — and finding any file. **Also see:** [running.md](running.md) · [methodology.md](methodology.md) · [repo-overview.md](repo-overview.md).
 
+![Two routes to the same bridge — an interactive agy session calls the model-dispatch tools through call_mcp_tool; a headless run.mjs invocation shells out to dispatch.mjs, which speaks MCP to the same server; both reach the same five tools, adapters and telemetry.jsonl](assets/dispatch-routes.svg)
 
 The conductor shape: a cheap conductor runs the loop, every model call goes through the bridge, the harness around the conductor writes the records.
 
