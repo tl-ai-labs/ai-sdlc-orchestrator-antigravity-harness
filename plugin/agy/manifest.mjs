@@ -25,7 +25,7 @@ import { parse as parseYaml } from "yaml";
 
 import { buildManifest } from "../mcp/model-dispatch/dist/telemetry.js";
 import { readPin, driverSlug, pendingPinChecks } from "./telemetry/fairnessPin.mjs";
-import { driverRange, driverRangeNote } from "./telemetry/driverRange.mjs";
+import { driverRange, driverRangeNote, driverRangeNotes } from "./telemetry/driverRange.mjs";
 
 export const HARNESS_NAME = "antigravity";
 export const RUNTIME_NAME = "antigravity-cli";
@@ -78,7 +78,7 @@ export const CLAUDE_WORKER_ADAPTERS = new Set(["claude-agent-sdk", "claude-cli"]
  * "unmeasured, never free"), so the dashboard never reads the $0 as free.
  */
 export const UNMEASURED_DRIVER_BASIS =
-  "NOT MEASURED: no headless launcher record (driver-manifest.json). An interactive agy session gives the plugin no usage counters (p1 checks 1, 13), so the conductor's own tokens are in no figure — unmeasured, never free";
+  "NOT MEASURED: no headless launcher record (driver-manifest.json), so no agy usage counters were captured for the conductor; the plugin reads none from an interactive session. Its tokens are in no figure — unmeasured, never free";
 
 export function costLines({ dispatched, modeled, policy, pin, env = process.env, login = null, driverUsage = null, driverMeasured = modeled.length > 0 || driverUsage != null }) {
   const claudeModels = new Set(
@@ -175,7 +175,9 @@ export function buildHarnessManifest({ runDir, policyName, runId, env = process.
     driver_cost_usd: driverLine.cost_usd,
     driver_cost_basis: driverLine.basis,
     driver_turns: modeled.length,
-    ...(driverLine.cost_usd_low !== undefined ? { driver_cost_usd_low: driverLine.cost_usd_low, driver_cost_resume_check: driverLine.resume_check } : {}),
+    ...(driverLine.cost_usd_low !== undefined ? { driver_cost_usd_low: driverLine.cost_usd_low } : {}),
+    ...(driverLine.resume_check ? { driver_cost_resume_check: driverLine.resume_check } : {}),
+    ...(driverLine.resumed_without_earlier_record ? { driver_resumed_without_earlier_record: true } : {}),
     ...(driverLine.invocations_without_usage ? { driver_invocations_without_usage: driverLine.invocations_without_usage } : {}),
     agy_invocations: driverManifest?.agy_invocations ?? null,
     completed: driverManifest?.completed ?? null,
@@ -198,6 +200,7 @@ export function buildHarnessManifest({ runDir, policyName, runId, env = process.
       output_tokens: driverLine.output_tokens,
       thinking_tokens: driverLine.thinking_tokens,
       provenance: driverLine.kind,
+      ...(driverLine.tokens_low ? { bound: "upper", low: driverLine.tokens_low } : {}),
     },
   };
   // On the seat the Claude line is modeled too, so it leaves the cash figure.
@@ -213,6 +216,17 @@ export function buildHarnessManifest({ runDir, policyName, runId, env = process.
   };
 
   return { ...base, harness, usage, cost };
+}
+
+/** The driver part of the one-line CLI summary the interactive conductor relays. */
+export function driverSummary(manifest, driverUsage) {
+  if (manifest.cost.driver_measured === false) return "driver NOT MEASURED (unmeasured, never free)";
+  const notes = driverRangeNotes(driverUsage);
+  return `driver modeled $${manifest.cost.driver_modeled_usd}${notes.length ? ` (${notes.join("; ")})` : ""}`;
+}
+
+function driverManifestUsage(runDir) {
+  return readJson(join(runDir, "driver-manifest.json"))?.driver_usage ?? null;
 }
 
 export function parseArgs(argv) {
@@ -239,7 +253,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     const manifest = buildHarnessManifest({ runDir, policyName: args.policy, runId: args["run-id"], version: args["agy-version"] ?? agyVersion(), login: probeClaudeLogin() });
     const out = join(runDir, "manifest.json");
     writeFileSync(out, JSON.stringify(manifest, null, 2) + "\n", "utf8");
-    console.log(`manifest: wrote ${out} — dispatched cash $${manifest.cost.dispatched_cash_usd}, driver modeled $${manifest.cost.driver_modeled_usd}`);
+    console.log(`manifest: wrote ${out} — dispatched cash $${manifest.cost.dispatched_cash_usd}, ${driverSummary(manifest, driverManifestUsage(runDir))}`);
   } catch (err) {
     console.error(`manifest failed: ${err?.message ?? err}`);
     process.exit(1);
