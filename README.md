@@ -164,7 +164,7 @@ For an existing project, run `agy` inside that project's folder instead.
 **Prompt 1 — setup.** Paste this sentence exactly as it is:
 
 ```
-Set up this plugin from this repo - https://github.com/tl-ai-labs/ai-sdlc-orchestrator-antigravity-harness, branch develop
+Set up this plugin from this repo - https://github.com/tl-ai-labs/ai-sdlc-orchestrator-antigravity-harness, branch test/develop-candidate
 ```
 
 What happens next, in order (the full list is in [INSTALL.md](INSTALL.md)):
@@ -374,7 +374,7 @@ The stand-in ([tools/test/fixtures/fake-agy/](tools/test/fixtures/fake-agy/)) an
 To set up a project from a terminal instead of pasting the setup sentence:
 
 ```bash
-git clone --branch develop https://github.com/tl-ai-labs/ai-sdlc-orchestrator-antigravity-harness.git
+git clone --branch test/develop-candidate https://github.com/tl-ai-labs/ai-sdlc-orchestrator-antigravity-harness.git
 cd ai-sdlc-orchestrator-antigravity-harness
 npm ci && npm run build && npm test
 node tools/setup.mjs --project-root /path/to/your/project
