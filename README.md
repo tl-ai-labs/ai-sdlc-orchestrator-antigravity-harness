@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/tl-ai-labs/ai-sdlc-orchestrator-antigravity-harness/actions/workflows/test.yml/badge.svg)](https://github.com/tl-ai-labs/ai-sdlc-orchestrator-antigravity-harness/actions/workflows/test.yml)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue)](plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue)](plugin/plugin.json)
 
 ![How the plugin works — you paste two prompts in agy, Gemini 3.8 Flash conducts and dispatches every phase through the bridge, judgment work goes to Claude Opus 5 and mechanical work to Gemini 3.8 Flash, and your project gets both generated code and a full audit trail](docs/assets/hero.svg)
 
@@ -77,7 +77,7 @@ flowchart LR
 
     P0 --> P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7 --> P8 --> P9 --> P10
 
-    D[discovery<br/><i>brownfield only</i>]:::opus
+    D[discovery<br/><i>brownfield only</i>]:::cond
     C[change_plan<br/><i>brownfield only</i>]:::opus
     D -.-> P2
     C -.-> P4
@@ -120,7 +120,8 @@ Same rule applies to greenfield and brownfield. The default `antigravity-flash38
 |---|---|---|
 | `requirements_analysis` · `architecture_design` · `plan_task_packets` | premium | Claude Opus 5, effort high |
 | `senior_code_review` · `security_review` | premium | Claude Opus 5, effort high |
-| `discovery` · `change_plan` (brownfield only) | premium | Claude Opus 5, effort high |
+| `change_plan` (brownfield only) | premium | Claude Opus 5, effort high |
+| `discovery` (brownfield only) | driver | the conductor's own local read, never dispatched; logged as an `in_session` row |
 | `execute_packets` (codegen) · `tests` · `docs` | mechanical | Gemini 3.8 Flash |
 | `debug` (retry_count ≥ 2) | premium | Claude Opus 5 (auto-escalation) |
 | `test_run` | local | Bash on your machine, no model call |
@@ -131,7 +132,16 @@ Source: [plugin/config/policies/antigravity-flash38-plus-opus5.yaml:89](plugin/c
 Two guardrails ship on:
 
 - **Escalation** — a mechanical-tier packet that fails validation twice auto-routes to Opus 5 on the third attempt. Prevents infinite retries when Flash can't solve a particular puzzle.
-- **Hard cost cap** — `hard_cost_cap_usd: 50` per run ([antigravity-flash38-plus-opus5.yaml:154](plugin/config/policies/antigravity-flash38-plus-opus5.yaml)). The policy declares it, the console shows it on every card and carries it into saved policies, and the pricing preflight reads the policy back to you before any paid run. Raise or lower it in your own policy.
+- **Hard cost cap** — `hard_cost_cap_usd: 50` per run ([antigravity-flash38-plus-opus5.yaml:157](plugin/config/policies/antigravity-flash38-plus-opus5.yaml)). Before each `execute_with_model` call, the bridge sums `cost_usd` over the run's `telemetry.jsonl`, leaving out `tier: "orchestrator"` lines. Once that sum reaches the cap, the bridge refuses the dispatch without calling a model and returns an error naming the cap, the spend and the file. Raise or lower the cap in your own policy, or remove the key to run without one; a value that is not a positive number fails at policy load. The console shows the cap on every card and carries it into saved policies.
+
+  What the cap does not cover:
+
+  | Case | Why |
+  |---|---|
+  | The call that crosses the cap | The check runs before a call, never during it, so that call completes and the run ends above the cap by its cost. Calls already in flight also complete. |
+  | A dispatch with no `telemetry_path` | The bridge has no file to count from, so it neither checks that dispatch nor counts its cost. |
+  | The driver's modeled line | It lives in `driver-cost-modeled.jsonl`, not `telemetry.jsonl`, and modeled dollars are never summed with cash. |
+  | A single judgment call's output | Opus 5 runs uncapped; see [docs/methodology.md](docs/methodology.md#output-ceiling-doubling). |
 
 One policy ships:
 
@@ -180,7 +190,7 @@ Framed by what you want to do, not by every provider that exists. Full provider 
 
 | If you want to… | You need |
 |---|---|
-| **Try it at all** | Node.js 20+, the Antigravity CLI (`agy` ≥ 1.2.3) signed in to a Google account, Claude Code (`claude`) on PATH, macOS/Linux/WSL2, and one Claude wallet: a claude.ai subscription Claude Code is signed in to (the seat — Opus cost modeled), an `ANTHROPIC_API_KEY` (arm A), or a GCP project with Claude enabled in Model Garden (arm B) |
+| **Try it at all** | Node.js 22.19+, the Antigravity CLI (`agy` ≥ 1.2.3) signed in to a Google account, Claude Code (`claude`) on PATH, macOS/Linux/WSL2, and one Claude wallet: a claude.ai subscription Claude Code is signed in to (the seat — Opus cost modeled), an `ANTHROPIC_API_KEY` (arm A), or a GCP project with Claude enabled in Model Garden (arm B) |
 | **Run the mechanical tier** | The above, plus a Gemini door — a `GEMINI_API_KEY` from [AI Studio](https://aistudio.google.com/app/apikey), or Application Default Credentials from `gcloud auth application-default login` |
 | **Use the Antigravity agent path** | The above, plus Python 3.10+ (macOS ships 3.9, too old) **and** Vertex ADC — there is no API-key door for the agent worker |
 
@@ -252,7 +262,7 @@ Full flag surface for the headless driver is in [docs/running.md](docs/running.m
 
 ## What a run produces
 
-Every artifact lands under `./.sdlc/` (for `/mmo:greenfield` and `run.mjs`'s default `--output-dir`) or `.sdlc/runs/<run-id>/` (for brownfield). Generated source lands under `./src/`.
+Every artifact lands in the run's own folder, `.sdlc/runs/<run-id>/`, for every entry point. Generated source lands under `./src/` (greenfield) or in place (brownfield).
 
 | File | Contents |
 |---|---|
@@ -264,7 +274,7 @@ Every artifact lands under `./.sdlc/` (for `/mmo:greenfield` and `run.mjs`'s def
 | `provenance.json` | Every file the run touched, with pre-run hash — the input `/mmo:revert` reads. Brownfield only. |
 | `delegation/` | Only on runs that used the agent path. Three files per delegated packet: task brief, worker usage sidecar, receipt. |
 | `.hook-logs/hook.jsonl` | One line per bridge call, from the `PostToolUse` heartbeat. Backup beside the bridge's own ledger; safe to delete. Interactive runs only. |
-| Cost report | `node tools/report.mjs <run-dir>` — per-phase table, the driver loop in its own **modeled, not measured** section, delegation table if any, provenance key. |
+| Cost report | `node tools/report.mjs <run-dir>` — the manifest's labelled cost lines with a cash figure that excludes modeled dollars, a per-phase table, the driver loop in its own **modeled, not measured** section, delegation table if any, provenance key. |
 
 ![Three cost lines — the driver is modeled from agy's usage counters, the Gemini workers are cash, the Claude worker is cash on an Anthropic key or Vertex and modeled on the claude.ai seat; the two kinds of dollars are never summed](docs/assets/cost-lines.svg)
 
@@ -276,8 +286,8 @@ No measured (paid) run has been published yet; the first will be the [Ping Servi
 
 ```bash
 mkdir -p /tmp/smoke && cp examples/quick-demo/brief.md /tmp/smoke/brief.md
-npm run smoke -- --project-root=/tmp/smoke --output-dir=/tmp/smoke/.sdlc --run-id=smoke1
-node tools/report.mjs /tmp/smoke/.sdlc
+npm run smoke -- --project-root=/tmp/smoke --run-id=smoke1
+node tools/report.mjs /tmp/smoke/.sdlc/runs/smoke1
 ```
 
 The stub speaks the recorded stream-json shapes, needs two invocations (so the resume loop runs), and makes one real $0 bridge call through the dispatch fallback. Nothing it emits is a measurement; every figure in that report is made up and labeled modeled. The same run executes under `npm test` ([tools/test/smoke-run.test.mjs](tools/test/smoke-run.test.mjs)).
@@ -318,7 +328,7 @@ node tools/setup.mjs --project-root /path/to/your/project
 A headless run, dry first — the invocation prints with every credential reported only as set/unset:
 
 ```bash
-node plugin/agy/run.mjs --brief=examples/quick-demo/brief.md --project-root=/path/to/empty/dir --output-dir=/path/to/empty/dir/.sdlc --gates=auto-approve --dry-run
+node plugin/agy/run.mjs --brief=examples/quick-demo/brief.md --project-root=/path/to/empty/dir --gates=auto-approve --dry-run
 ```
 
 ## Documentation
